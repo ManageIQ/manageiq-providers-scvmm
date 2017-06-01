@@ -1,0 +1,12 @@
+---
+:ems:
+  :ems_scvmm:
+    :blacklisted_event_names: []
+    :event_handling:
+      :event_groups:
+:http_proxy:
+  :scvmm:
+    :host:
+    :password:
+    :port:
+    :user:
