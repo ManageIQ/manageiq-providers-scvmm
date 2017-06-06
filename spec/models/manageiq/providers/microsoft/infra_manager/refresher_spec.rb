@@ -6,7 +6,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     @ems = FactoryGirl.create(:ems_microsoft_with_authentication, :zone => zone,
         :hostname => "scvmm1111.manageiq.com", :ipaddress => "192.168.252.90", :security_protocol => "ssl")
 
-    data_file = Rails.root.join("spec", "tools", "scvmm_data", "get_inventory_output.json")
+    data_file = ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.json")
     output    = JSON.parse(IO.read(data_file.to_s))
     allow(ManageIQ::Providers::Microsoft::InfraManager).to receive(:execute_powershell_json).and_return(output)
   end
