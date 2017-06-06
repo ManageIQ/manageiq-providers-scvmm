@@ -39,7 +39,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
 
     before(:each) do
       $original_scvmm_log = $scvmm_log.clone
-      @log_file = Rails.root.join("spec/tools/scvmm_data/powershell.log")
+      @log_file = ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "powershell.log")
       $scvmm_log = Vmdb::Loggers::MirroredLogger.new(@log_file, "<POWERSHELL>")
     end
 
@@ -82,7 +82,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
 
   context "decompress_results" do
     before(:all) do
-      @xml_file = Rails.root.join("spec/tools/scvmm_data/get_inventory_output.xml")
+      @xml_file = ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.xml")
       @xml = IO.read(@xml_file)
     end
 
@@ -103,7 +103,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
 
   context "parse_json_results" do
     before(:all) do
-      @yml_file = Rails.root.join("spec/tools/scvmm_data/get_inventory_output.yml")
+      @yml_file = ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.yml")
       @json = JSON.dump(YAML.load(IO.read(@yml_file)))
     end
 
