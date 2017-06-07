@@ -5,8 +5,8 @@ require 'yaml'
 namespace :manageiq do
   namespace :providers do
     namespace :scvmm do
-      desc "Regenerate VCR cassette"
-      task :regenerate_cassette, [:username, :password, :host, :port] do |_t, args|
+      desc "Create a JSON output file used for specs"
+      task :generate_json, [:username, :password, :host, :port] do |_t, args|
         secrets = Rails.application.secrets.scvmm
 
         host     = args[:host]     || secrets['host']
@@ -31,9 +31,9 @@ namespace :manageiq do
           :disable_sspi => true
         )
 
-        output_yml = File.join(
+        output_json = File.join(
           provider_root,
-          'spec/tools/scvmm_data/get_inventory_output.yml'
+          'spec/tools/scvmm_data/get_inventory_output.json'
         )
 
         begin
@@ -42,8 +42,7 @@ namespace :manageiq do
           if output.stderr && output.stderr != ''
             raise "Inventory collection failed: " + output.stderr
           else
-            data = JSON.parse(output.stdout)
-            File.open(output_yml, 'w') { |fh| fh.write data.to_yaml }
+            File.open(output_json, 'w') { |fh| fh.write output.stdout }
           end
         ensure
           shell.close
