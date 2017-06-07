@@ -1,2 +1,5 @@
-# GlobalVars:
-#   AllowedVariables:
+GlobalVars:
+  AllowedVariables:
+
+  # Loggers
+  - $scvmm_log
