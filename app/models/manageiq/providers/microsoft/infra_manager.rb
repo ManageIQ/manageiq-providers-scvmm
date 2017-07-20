@@ -137,7 +137,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
   def build_connect_params(options)
     connect_params  = {
       :user         => options[:user]     || authentication_userid(options[:auth_type]),
-      :password     => options[:password] || authentication_password(options[:auth_type]),
+      :password     => MiqPassword.try_decrypt(options[:password]) || authentication_password(options[:auth_type]),
       :endpoint     => options[:endpoint],
       :disable_sspi => true
     }
