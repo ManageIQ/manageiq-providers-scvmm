@@ -118,15 +118,21 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
   def create_vm_script
     <<-PS_SCRIPT
       Import-Module VirtualMachineManager | Out-Null; \
-      Get-SCVMMServer localhost | Out-Null;\
 
-      $vm = New-SCVirtualMachine \
-        -Name '#{dest_name}' \
-        -VMHost #{dest_host} \
-        -Path '#{dest_mount_point}' \
-        -VMTemplate #{template_ps_script}; \
+      $template = Get-SCVMTemplate -Name '#{source.name}'; \
+      $vmconfig = New-SCVMConfiguration -VMTemplate $template -Name 'ManageIQConfig-#{dest_name}'; \
+      $vmhost   = Get-SCVMHost -ComputerName '#{dest_host}'; \
 
-      $vm | ConvertTo-Json -Compress
+      Set-SCVMConfiguration \
+        -VMConfiguration $vmconfig \
+        -VMHost $vmhost \
+        -VMLocation '#{dest_mount_point}' | Out-Null; \
+
+      Update-SCVMConfiguration -VMConfiguration $vmconfig | Out-Null; \
+
+      $vm = New-SCVirtualMachine -Name '#{dest_name}' -VMConfiguration $vmconfig; \
+
+      $vm | Select-Object ID | ConvertTo-Json -Compress
     PS_SCRIPT
   end
 
@@ -136,7 +142,8 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
 
       Set-SCVirtualMachine -VM $vm \
         #{cpu_ps_script} \
-        #{memory_ps_script} | Out-Null;  \
+        #{memory_ps_script} | Out-Null; \
+
       #{network_adapter_ps_script}; \
 
       $vm | Select-Object ID | ConvertTo-Json -Compress
@@ -144,7 +151,6 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
   end
 
   def start_clone(_clone_options)
-    $scvmm_log.debug(create_vm_script)
     results = source.ext_management_system.run_powershell_script(create_vm_script)
 
     if results.stdout.blank?
