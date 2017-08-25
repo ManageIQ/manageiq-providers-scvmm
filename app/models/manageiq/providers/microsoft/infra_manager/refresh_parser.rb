@@ -35,6 +35,7 @@ module ManageIQ::Providers::Microsoft
       get_clusters
       get_vms
       get_images
+      get_vm_networks
       create_relationship_tree
       $scvmm_log.info("#{log_header}...Complete")
       @data
@@ -84,6 +85,28 @@ module ManageIQ::Providers::Microsoft
     def get_images
       images = @inventory['images']
       process_collection(images, :vms) { |image| parse_image(image) }
+    end
+
+    def get_vm_networks
+      vm_networks = @inventory['vmnetworks']
+      process_collection(vm_networks, :guest_devices) { |vm_network| parse_vm_network(vm_network) }
+    end
+
+    def parse_vm_network(vm_network)
+      logical_network = vm_network['LogicalNetwork']
+      uid = vm_network['ID']
+
+      new_result = {
+        :ems_ref      => uid,
+        :device_name  => vm_network['Name'],
+        :device_type  => 'vmnetwork',
+        :lan          => {
+          :name    => logical_network['Name'],
+          :uid_ems => logical_network['ID']
+        }
+      }
+
+      return uid, new_result
     end
 
     def parse_storage_fileshare(volume)
