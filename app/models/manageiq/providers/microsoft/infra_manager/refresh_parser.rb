@@ -93,16 +93,26 @@ module ManageIQ::Providers::Microsoft
     end
 
     def parse_vm_network(vm_network)
-      logical_network = vm_network['LogicalNetwork']
       uid = vm_network['ID']
+      logical_network = vm_network['LogicalNetwork']
+
+      vnet = @inventory['vnets'].select do |vnet|
+        vnet['LogicalNetworks'].find do |vnet_ln|
+          vnet_ln['ID'] == logical_network['ID']
+        end
+      end.first
+
+      # TODO: Get this out of @data_index somehow
+      switch = vnet ? Switch.find_by(:uid_ems => vnet['ID']) : nil
 
       new_result = {
-        :ems_ref      => uid,
-        :device_name  => vm_network['Name'],
-        :device_type  => 'vmnetwork',
-        :lan          => {
+        :ems_ref     => uid,
+        :device_name => vm_network['Name'],
+        :device_type => 'vmnetwork',
+        :lan => {
           :name    => logical_network['Name'],
-          :uid_ems => logical_network['ID']
+          :uid_ems => logical_network['ID'],
+          :switch  => switch
         }
       }
 
