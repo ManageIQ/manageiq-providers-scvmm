@@ -31,6 +31,7 @@ module ManageIQ::Providers::Microsoft
       get_ems
       get_datastores
       get_storage_fileshares
+      get_switches
       get_hosts
       get_clusters
       get_vms
@@ -90,6 +91,26 @@ module ManageIQ::Providers::Microsoft
     def get_vm_networks
       vm_networks = @inventory['vmnetworks']
       process_collection(vm_networks, :guest_devices) { |vm_network| parse_vm_network(vm_network) }
+    end
+
+    def get_switches
+      switches = @inventory['vnets']
+      process_collection(switches, :switches) { |switch| parse_switch(switch) }
+    end
+
+    # TODO: This was added in order to properly support VM networks. There is
+    # some overlap with the parse_host method. We should clean that up.
+    #
+    def parse_switch(switch)
+      uid = switch['ID']
+
+      new_result = {
+        :uid_ems => uid,
+        :name    => switch['Name'],
+        :lans    => process_logical_networks(switch['LogicalNetworks'])
+      }
+
+      return uid, new_result
     end
 
     def parse_vm_network(vm_network)
