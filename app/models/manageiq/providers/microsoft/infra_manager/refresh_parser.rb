@@ -102,8 +102,9 @@ module ManageIQ::Providers::Microsoft
         end
       end.first
 
-      # TODO: Get this out of @data_index somehow
-      switch = vnet ? Switch.find_by(:uid_ems => vnet['ID']) : nil
+      return unless vnet
+
+      switch = @data_index.fetch_path(:switches, vnet['ID'])
 
       new_result = {
         :ems_ref     => uid,
