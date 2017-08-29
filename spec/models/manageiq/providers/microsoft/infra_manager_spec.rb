@@ -72,4 +72,27 @@ describe ManageIQ::Providers::Microsoft::InfraManager do
       @e.connect(:user => "user2", :password => "pass2", :hostname => "host2")
     end
   end
+
+  context "#raw_connect with validation" do
+    it "validates the connection if validate is true" do
+      require 'winrm'
+      connection, powershell = double, double
+      params = { :endpoint => "http://host2:5985/wsman", :user => "user", :password => "password" }
+      allow(WinRM::Connection).to receive(:new).with(params).and_return(connection)
+
+      expect(connection).to receive(:shell).with(:powershell).and_return(powershell)
+      expect(powershell).to receive(:run).with('hostname')
+
+      described_class.raw_connect(params, true)
+    end
+
+    it "decrypts the password" do
+      password = MiqPassword.encrypt("password")
+      params = { :endpoint => "http://host2:5985/wsman", :user => "user", :password => password }
+
+      expect(MiqPassword).to receive(:try_decrypt).with(password).and_return("password")
+
+      described_class.raw_connect(params)
+    end
+  end
 end
