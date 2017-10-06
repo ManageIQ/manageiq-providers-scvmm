@@ -198,12 +198,25 @@ module ManageIQ::Providers::Microsoft
     end
 
     def process_logical_networks(logical_networks)
-      logical_networks.collect do |ln|
-        {
+      network_hashes = []
+
+      logical_networks.each do |ln|
+        result = {
           :name    => ln['Name'],
           :uid_ems => ln['ID'],
         }
+
+        network_hashes << result
+
+        Array(ln['VMNetworks']).each do |vm_network|
+          network_hashes << {
+            :name    => vm_network['Name'],
+            :uid_ems => vm_network['ID'],
+          }
+        end
       end
+
+      network_hashes
     end
 
     def set_switch_on_pnic(pnic, switch)
