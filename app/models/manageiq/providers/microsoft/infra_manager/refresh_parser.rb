@@ -13,7 +13,6 @@ module ManageIQ::Providers::Microsoft
       @connection         = ems.connect
       @data               = {}
       @data_index         = {}
-      @host_hash_by_name  = {}
     end
 
     def ems_inv_to_hashes
@@ -31,12 +30,10 @@ module ManageIQ::Providers::Microsoft
       get_ems
       get_datastores
       get_storage_fileshares
-      get_switches
       get_hosts
       get_clusters
       get_vms
       get_images
-      get_vm_networks
       create_relationship_tree
       $scvmm_log.info("#{log_header}...Complete")
       @data
@@ -63,10 +60,16 @@ module ManageIQ::Providers::Microsoft
     def get_hosts
       hosts = @inventory['hosts']
 
+      switches_by_host_name = @inventory['vnets'].group_by { |switch| switch['VMHostName'] }
+      vm_nets_by_logical_network_id = @inventory['vmnetworks'].group_by { |vmnet| vmnet['LogicalNetwork']['ID'] }
+
       # Set VirtualSwitch as a path to LogicalNetworks, VMHostNetworkAdapters, etc.
       hosts.each do |host|
-        host['VirtualSwitch'] = @inventory['vnets'].select do |v|
-          v['VMHostName'] == host['Name']
+        host['VirtualSwitch'] = Array(switches_by_host_name[host['Name']])
+        host['VirtualSwitch'].each do |switch|
+          switch['LogicalNetworks'].each do |logical_network|
+            logical_network['VMNetworks'] = Array(vm_nets_by_logical_network_id[logical_network['ID']])
+          end
         end
       end
 
@@ -86,59 +89,6 @@ module ManageIQ::Providers::Microsoft
     def get_images
       images = @inventory['images']
       process_collection(images, :vms) { |image| parse_image(image) }
-    end
-
-    def get_vm_networks
-      vm_networks = @inventory['vmnetworks']
-      process_collection(vm_networks, :guest_devices) { |vm_network| parse_vm_network(vm_network) }
-    end
-
-    def get_switches
-      switches = @inventory['vnets']
-      process_collection(switches, :switches) { |switch| parse_switch(switch) }
-    end
-
-    # TODO: This was added in order to properly support VM networks. There is
-    # some overlap with the parse_host method. We should clean that up.
-    #
-    def parse_switch(switch)
-      uid = switch['ID']
-
-      new_result = {
-        :uid_ems => uid,
-        :name    => switch['Name'],
-        :lans    => process_logical_networks(switch['LogicalNetworks'])
-      }
-
-      return uid, new_result
-    end
-
-    def parse_vm_network(vm_network)
-      uid = vm_network['ID']
-      logical_network = vm_network['LogicalNetwork']
-
-      vnet = @inventory['vnets'].select do |vnet|
-        vnet['LogicalNetworks'].find do |vnet_ln|
-          vnet_ln['ID'] == logical_network['ID']
-        end
-      end.first
-
-      return unless vnet
-
-      switch = @data_index.fetch_path(:switches, vnet['ID'])
-
-      new_result = {
-        :ems_ref     => uid,
-        :device_name => vm_network['Name'],
-        :device_type => 'vmnetwork',
-        :lan => {
-          :name    => logical_network['Name'],
-          :uid_ems => logical_network['ID'],
-          :switch  => switch
-        }
-      }
-
-      return uid, new_result
     end
 
     def parse_storage_fileshare(volume)
