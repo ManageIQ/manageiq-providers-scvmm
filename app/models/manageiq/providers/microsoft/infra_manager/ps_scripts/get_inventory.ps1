@@ -44,7 +44,7 @@ $images = @(Get-SCVMTemplate -VMMServer localhost |
 
 $clusters = @(Get-SCVMHostCluster -VMMServer localhost | Select -Property ClusterName,ID,Nodes)
 
-$vmnetworks = @(Get-SCVMNetwork | Select -Property ID,Name,LogicalNetwork)
+$vmnetworks = @(Get-SCVMNetwork | Select -Property ID,Name,LogicalNetwork,VMSubnet)
 
 $hash["ems"] = $ems
 $hash["hosts"] = $hosts
