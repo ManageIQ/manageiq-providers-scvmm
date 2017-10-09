@@ -212,11 +212,24 @@ module ManageIQ::Providers::Microsoft
           network_hashes << {
             :name    => vm_network['Name'],
             :uid_ems => vm_network['ID'],
+            :subnets => process_subnets(vm_network),
+            :parent  => result,
           }
         end
       end
 
       network_hashes
+    end
+
+    def process_subnets(vm_network)
+      subnets = Array(vm_network['VMSubnet'])
+      subnets.map do |subnet|
+        {
+          :name    => subnet['Name'],
+          :ems_ref => subnet['ID'],
+          :cidr    => subnet['SubnetVLans'],
+        }
+      end
     end
 
     def set_switch_on_pnic(pnic, switch)
