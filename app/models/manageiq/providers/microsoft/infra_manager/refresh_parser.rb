@@ -60,8 +60,11 @@ module ManageIQ::Providers::Microsoft
     def get_hosts
       hosts = @inventory['hosts']
 
-      switches_by_host_name = @inventory['vnets'].group_by { |switch| switch['VMHostName'] }
-      vm_nets_by_logical_network_id = @inventory['vmnetworks'].group_by { |vmnet| vmnet['LogicalNetwork']['ID'] }
+      switches = Array(@inventory['vnets'])
+      vm_networks = Array(@inventory['vmnetworks'])
+
+      switches_by_host_name = switches.group_by { |switch| switch['VMHostName'] }
+      vm_nets_by_logical_network_id = vm_networks.group_by { |vmnet| vmnet['LogicalNetwork']['ID'] }
 
       # Set VirtualSwitch as a path to LogicalNetworks, VMHostNetworkAdapters, etc.
       hosts.each do |host|
