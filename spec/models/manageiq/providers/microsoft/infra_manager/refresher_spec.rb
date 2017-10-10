@@ -170,7 +170,8 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
   end
 
   def assert_specific_vm_network
-    vm_network = @ems.lans.find_by(:uid_ems => "47ac12ce-a7d4-4766-8c86-9879c75c3f97")
+    switch = @ems.switches.find_by(:uid_ems => "a840681c-7459-4ba0-9dd5-a706f220822f")
+    vm_network = switch.lans.find_by(:uid_ems => "47ac12ce-a7d4-4766-8c86-9879c75c3f97")
 
     expect(vm_network).to have_attributes(
       :name                       => "vm_network_1",
