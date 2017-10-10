@@ -27,6 +27,8 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
       assert_specific_cluster
       assert_specific_host
       assert_esx_host
+      assert_specific_vm_network
+      assert_specific_subnet
       assert_specific_vm
       assert_specific_guest_devices
       assert_specific_snapshot
@@ -49,6 +51,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     expect(GuestDevice.count).to eq(11)
     expect(Hardware.count).to eq(58)
     expect(Lan.count).to eq(41)
+    expect(Subnet.count).to eq(13)
     expect(MiqScsiLun.count).to eq(0)
     expect(MiqScsiTarget.count).to eq(0)
     expect(Network.count).to eq(32)
@@ -77,6 +80,8 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     expect(@ems.vms.size).to eq(32)
     expect(@ems.miq_templates.size).to eq(23)
     expect(@ems.customization_specs.size).to eq(0)
+    expect(@ems.lans.size).to eq(41)
+    expect(@ems.subnets.size).to eq(13)
   end
 
   def assert_specific_storage
@@ -162,6 +167,38 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
   def assert_esx_host
     esx = Host.find_by_vmm_product("VMWareESX")
     expect(esx).to eq(nil)
+  end
+
+  def assert_specific_vm_network
+    vm_network = @ems.lans.find_by(:uid_ems => "47ac12ce-a7d4-4766-8c86-9879c75c3f97")
+
+    expect(vm_network).to have_attributes(
+      :name                       => "vm_network_1",
+      :tag                        => nil,
+      :uid_ems                    => "47ac12ce-a7d4-4766-8c86-9879c75c3f97",
+      :allow_promiscuous          => nil,
+      :forged_transmits           => nil,
+      :mac_changes                => nil,
+      :computed_allow_promiscuous => nil,
+      :computed_forged_transmits  => nil,
+      :computed_mac_changes       => nil,
+    )
+
+    expect(vm_network.switch).to_not     be_nil
+    expect(vm_network.switch.uid_ems).to eq("a840681c-7459-4ba0-9dd5-a706f220822f")
+    expect(vm_network.subnets.size).to   eq(1)
+  end
+
+  def assert_specific_subnet
+    subnet = @ems.subnets.find_by(:ems_ref => "d08b30d8-4f39-4e90-9b2a-d490f4bdfa1e")
+    expect(subnet).to have_attributes(
+      :ems_ref => "d08b30d8-4f39-4e90-9b2a-d490f4bdfa1e",
+      :name    => "vm_network_1_0",
+      :type    => "ManageIQ::Providers::Microsoft::InfraManager::Subnet",
+    )
+
+    expect(subnet.lan).to_not     be_nil
+    expect(subnet.lan.uid_ems).to eq("47ac12ce-a7d4-4766-8c86-9879c75c3f97")
   end
 
   def assert_specific_vm
