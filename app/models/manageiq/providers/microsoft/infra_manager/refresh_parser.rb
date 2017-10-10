@@ -222,12 +222,11 @@ module ManageIQ::Providers::Microsoft
     end
 
     def process_subnets(vm_network)
-      subnets = Array(vm_network['VMSubnet'])
-      subnets.map do |subnet|
+      Array(vm_network['VMSubnet']).map do |subnet|
         {
+          :type    => 'ManageIQ::Providers::Microsoft::InfraManager::Subnet',
           :name    => subnet['Name'],
           :ems_ref => subnet['ID'],
-          :cidr    => subnet['SubnetVLans'],
         }
       end
     end
