@@ -34,6 +34,7 @@ module ManageIQ::Providers::Microsoft
       get_clusters
       get_vms
       get_images
+      get_vm_networks
       create_relationship_tree
       $scvmm_log.info("#{log_header}...Complete")
       @data
@@ -92,6 +93,49 @@ module ManageIQ::Providers::Microsoft
     def get_images
       images = @inventory['images']
       process_collection(images, :vms) { |image| parse_image(image) }
+    end
+
+    def get_vm_networks
+      vm_networks = @inventory['vmnetworks']
+      process_collection(vm_networks, :lans) { |vm_network| parse_vm_network(vm_network) }
+    end
+
+    def parse_vm_network(vm_network)
+      uid = vm_network['ID']
+      logical_network = vm_network['LogicalNetwork']
+
+      # Connect the VM network to the Logical network via the Virtual network.
+      vnet = @inventory['vnets'].select do |vn|
+        vn['LogicalNetworks'].find { |vnet_ln| vnet_ln['ID'] == logical_network['ID'] }
+      end.first
+
+      return unless vnet
+      subnets = process_subnets(vm_network)
+
+      new_result = {
+        :name    => vm_network['Name'],
+        :ems_ref => uid,
+        :parent  => vnet,
+        :subnets => subnets
+      }
+
+      return uid, new_result
+    end
+
+    def process_subnets(vm_network)
+      subnets = vm_network['VMSubnet']
+      return if subnets.blank?
+      array = []
+
+      subnets.each do |subnet|
+        array << {
+          :name    => subnet['Name'],
+          :ems_ref => subnet['ID'],
+          :cidr    => subnet['SubnetVLans'],
+        }
+      end
+
+      return array
     end
 
     def parse_storage_fileshare(volume)
