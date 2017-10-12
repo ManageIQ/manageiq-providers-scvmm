@@ -27,6 +27,8 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
       assert_specific_cluster
       assert_specific_host
       assert_esx_host
+      assert_specific_vm_network
+      assert_specific_subnet
       assert_specific_vm
       assert_specific_guest_devices
       assert_specific_snapshot
@@ -41,24 +43,25 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     expect(EmsCluster.count).to eq(1)
     expect(Host.count).to eq(3)
     expect(ResourcePool.count).to eq(0)
-    expect(Vm.count).to eq(46)
-    expect(VmOrTemplate.count).to eq(71)
+    expect(Vm.count).to eq(32)
+    expect(VmOrTemplate.count).to eq(55)
     expect(CustomAttribute.count).to eq(0)
     expect(CustomizationSpec.count).to eq(0)
-    expect(Disk.count).to eq(66)
-    expect(GuestDevice.count).to eq(13)
-    expect(Hardware.count).to eq(74)
-    expect(Lan.count).to eq(6)
+    expect(Disk.count).to eq(65)
+    expect(GuestDevice.count).to eq(11)
+    expect(Hardware.count).to eq(58)
+    expect(Lan.count).to eq(41)
+    expect(Subnet.count).to eq(13)
     expect(MiqScsiLun.count).to eq(0)
     expect(MiqScsiTarget.count).to eq(0)
-    expect(Network.count).to eq(46)
-    expect(OperatingSystem.count).to eq(74)
-    expect(Snapshot.count).to eq(10)
-    expect(Switch.count).to eq(4)
+    expect(Network.count).to eq(32)
+    expect(OperatingSystem.count).to eq(58)
+    expect(Snapshot.count).to eq(7)
+    expect(Switch.count).to eq(6)
     expect(SystemService.count).to eq(0)
-    expect(Relationship.count).to eq(78)
-    expect(MiqQueue.count).to eq(71)
-    expect(Storage.count).to eq(14)
+    expect(Relationship.count).to eq(62)
+    expect(MiqQueue.count).to eq(55)
+    expect(Storage.count).to eq(15)
   end
 
   def assert_ems
@@ -71,12 +74,14 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     expect(@ems.ems_clusters.size).to eq(1)
     expect(@ems.resource_pools.size).to eq(0)
 
-    expect(@ems.storages.size).to eq(13)
+    expect(@ems.storages.size).to eq(14)
     expect(@ems.hosts.size).to eq(3)
-    expect(@ems.vms_and_templates.size).to eq(71)
-    expect(@ems.vms.size).to eq(46)
-    expect(@ems.miq_templates.size).to eq(25)
+    expect(@ems.vms_and_templates.size).to eq(55)
+    expect(@ems.vms.size).to eq(32)
+    expect(@ems.miq_templates.size).to eq(23)
     expect(@ems.customization_specs.size).to eq(0)
+    expect(@ems.lans.size).to eq(41)
+    expect(@ems.subnets.size).to eq(13)
   end
 
   def assert_specific_storage
@@ -86,13 +91,13 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     @storage = Storage.find_by(:name => storage_name)
 
     expect(@storage).to have_attributes(
-      :ems_ref                     => "15fb039d-027a-4113-8504-a37fd0994dca",
+      :ems_ref                     => "8d585b11-3bb2-4be7-931c-b6cec81ec85d",
       :name                        => storage_name,
       :store_type                  => "CSVFS",
       :total_space                 => 805_333_626_880,
       :free_space                  => 704_289_169_408,
       :multiplehostaccess          => 1,
-      :location                    => "15fb039d-027a-4113-8504-a37fd0994dca",
+      :location                    => "8d585b11-3bb2-4be7-931c-b6cec81ec85d",
       :thin_provisioning_supported => true
       )
   end
@@ -162,6 +167,39 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
   def assert_esx_host
     esx = Host.find_by_vmm_product("VMWareESX")
     expect(esx).to eq(nil)
+  end
+
+  def assert_specific_vm_network
+    switch = @ems.switches.find_by(:uid_ems => "a840681c-7459-4ba0-9dd5-a706f220822f")
+    vm_network = switch.lans.find_by(:uid_ems => "47ac12ce-a7d4-4766-8c86-9879c75c3f97")
+
+    expect(vm_network).to have_attributes(
+      :name                       => "vm_network_1",
+      :tag                        => nil,
+      :uid_ems                    => "47ac12ce-a7d4-4766-8c86-9879c75c3f97",
+      :allow_promiscuous          => nil,
+      :forged_transmits           => nil,
+      :mac_changes                => nil,
+      :computed_allow_promiscuous => nil,
+      :computed_forged_transmits  => nil,
+      :computed_mac_changes       => nil,
+    )
+
+    expect(vm_network.switch).to_not     be_nil
+    expect(vm_network.switch.uid_ems).to eq("a840681c-7459-4ba0-9dd5-a706f220822f")
+    expect(vm_network.subnets.size).to   eq(1)
+  end
+
+  def assert_specific_subnet
+    subnet = @ems.subnets.find_by(:ems_ref => "d08b30d8-4f39-4e90-9b2a-d490f4bdfa1e")
+    expect(subnet).to have_attributes(
+      :ems_ref => "d08b30d8-4f39-4e90-9b2a-d490f4bdfa1e",
+      :name    => "vm_network_1_0",
+      :type    => "ManageIQ::Providers::Microsoft::InfraManager::Subnet",
+    )
+
+    expect(subnet.lan).to_not     be_nil
+    expect(subnet.lan.uid_ems).to eq("47ac12ce-a7d4-4766-8c86-9879c75c3f97")
   end
 
   def assert_specific_vm
@@ -238,8 +276,8 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
   end
 
   def assert_specific_guest_devices
-    v0 = ManageIQ::Providers::Microsoft::InfraManager::Vm.find_by(:name => "fedora-tmpl-sm")
-    v1 = ManageIQ::Providers::Microsoft::InfraManager::Vm.find_by(:name => "jerrykbiker-dnd")
+    v0 = ManageIQ::Providers::Microsoft::InfraManager::Vm.find_by(:name => "cfme-vmm-ad-bu-DND")
+    v1 = ManageIQ::Providers::Microsoft::InfraManager::Vm.find_by(:name => "centos7min-vm")
     v2 = ManageIQ::Providers::Microsoft::InfraManager::Vm.find_by(:name => "DualDVDa")
 
     expect(v0.hardware.guest_devices.size).to eq(0)
@@ -249,9 +287,9 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     expect(v0.hardware.guest_devices).to be_empty
 
     expect(v1.hardware.guest_devices.first).to have_attributes(
-      :device_name     => "LinuxAgent",
+      :device_name     => "vmguest",
       :device_type     => "cdrom",
-      :filename        => "\\\\cfme_hyperv.cfme-qe-vmm-ad.rhq.lab.eng.bos.redhat.com\\scvmm2\\jerrykbiker-dnd\\LinuxAgent.iso",
+      :filename        => "C:\\Windows\\system32\\vmguest.iso",
       :controller_type => "IDE",
       :present         => true,
       :start_connected => true,
@@ -285,77 +323,61 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
             [ManageIQ::Providers::Microsoft::InfraManager::Host, "dhcp129-212.brq.redhat.com"] => {},
           },
           [EmsFolder, "vm"] => {
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "WS12CoreTemplateHA"]                   => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "Win12SCoreTemplate"]                   => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "Win7SmallTemplate"]                    => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-56402-02272311"]                  => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-57017-12192116"]                  => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-57103-0221213"]                   => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-57200-03221429"]                  => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-57201-04062043"]                  => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-5721"]                            => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-58015-0517195"]                   => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-58016-05221701"]                  => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-58016-05221944"]                  => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-58017-05252117"]                  => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-nightly-58015-201705180216"]      => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "fedora-sm-tmpl"]                       => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "fedora-sm-tmpl-ha"]                    => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "miq-nightly-201705232000"]             => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "miq-nightly-201705280915"]             => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "miq-stable-euwe-3-20170413"]           => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "miq-stable-fine-1-20170510"]           => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "miq-stable-fine-2-20170531"]           => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "win7pro64 base"]                       => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "win81npro64-base"]                     => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "ws2008r2d-sp1-tpl"]                    => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Template, "ws2008s-sp2-tpl"]                      => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "CFME-5554-JT"]                               => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "CFME-56400-JT"]                              => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "CFME-56402-JT"]                              => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "CFME-57100-JT"]                              => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "CFME-57103-JT"]                              => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "CFME-57201-JT"]                              => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "CFME-58014-JT"]                              => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "DualDVDa"]                                   => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "Engineering - win10ent64"]                   => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "Local33SSATest"]                             => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "MoVM"]                                       => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "NoDriveLetter7"]                             => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "REFS16Test3"]                                => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "ReFS2016Test2"]                              => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "Ubu1404LTS"]                                 => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "WS2008R2Core"]                               => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "WS2016NTFS"]                                 => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "Win7SmallTmpl"]                              => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "cfme-vmm-ad-bu-DND"]                         => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "cfme-vmm-ad-pri-DND"]                        => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "cluster-storage"]                            => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "dajo-dsl"]                                   => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "django-win7-jt"]                             => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "fedora-small"]                               => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "fedora-tmpl-sm"]                             => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "jerrykbiker-dnd"]                            => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "jt_dnd_w12r2d_dev"]                          => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "jt_dnd_w12r2d_scvmm_dev"]                    => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "lkhomenk-fedora-tmpl-sm"]                    => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "scvmm-sp1"]                                  => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "scvmm-sp1-1"]                                => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "scvmm2"]                                     => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "shveta_miq_0515"]                            => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "smis_netapp_dnd"]                            => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "sshveta_58013"]                              => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-provt-6il0"]                            => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-24xc0001"]                         => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-dq120001"]                         => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-g9oa0001"]                         => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-gzqc0001"]                         => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-imtb0001"]                         => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-mspj0001"]                         => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-rsc90001"]                         => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-zxiq0001"]                         => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "ws12r2dc-2DVDs"]                             => {},
-            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "ws2008r2d-sp1-26"]                           => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-ackr0001"]                                           => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "scvmm2"]                                                       => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "WS2008R2Core"]                                                 => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "centos7min-vm"]                                                => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "MoVM2"]                                                        => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "WS16DBase"]                                                    => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "cfme-vmm-ad-bu-DND"]                                           => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "SMIS2"]                                                        => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "MoVM"]                                                         => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "s_appl_downstream-58z_170825_ZU4rK63X"]                        => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-lpdt0001"]                                           => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-retir-w5o8"]                                              => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "shveta_cfme_dnd"]                                              => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-lapn0001"]                                           => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "DualDVDa"]                                                     => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "jt_dnd_w12r2d_dev"]                                            => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "bergerstuff"]                                                  => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "jt_dnd_w12r2d_scvmm_dev"]                                      => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "cluster-storage"]                                              => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "s_appl_downstream-58z_170825_JQVtimFJ"]                        => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-sjvp0001"]                                           => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-pwrct-0pbr"]                                              => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "s_appl_downstream-58z_170825_lLu6YzrG"]                        => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-pid30001"]                                           => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "scvmm-sp1"]                                                    => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "dberger_baz"]                                                  => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "s_appl_downstream-58z_170825_WhrMt4EY"]                        => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-scat-xawy0001"]                                           => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "jenkins_s_appl_downstream-58z_170825_HiIBEmGz"]                => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "cfme-vmm-ad-pri-DND"]                                          => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "test-pwr-c-qmuo"]                                              => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Vm, "anewman_s_appl_downstream-58z_170825_3xlUl2mb"]                => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "miq-nightly-201709012000"]                               => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "Temporary Template1ffae8e1-646f-4b04-8b43-6e2672f88180"] => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-58200-0824110"]                                     => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "miq-stable-euwe-3-20170413"]                             => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "WS16DTemplate"]                                          => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "miq-nightly-201709042000"]                               => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "cfme-nightly-58015-201705180216"]                        => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "ws2008r2d-sp1-tpl"]                                      => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "WS12UIStaticTmpl"]                                       => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "Win7SmallStatic-template"]                               => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "ws2008s-sp2-tpl"]                                        => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "miq-stable-fine-3-20170802"]                             => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "Win7SmallTemplate"]                                      => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "win81npro64-base"]                                       => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "Win12SCoreStatic"]                                       => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "WS12CoreTemplateHA"]                                     => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "miq-nightly-201709080811"]                               => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "fedora-sm-tmpl-ha"]                                      => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "WS16Base-Template"]                                      => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "fedora-sm-tmpl"]                                         => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "win7pro64 base"]                                         => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "miq-stable-fine-2-20170531"]                             => {},
+            [ManageIQ::Providers::Microsoft::InfraManager::Template, "Win12SCoreTemplate"]                                     => {},
           }
         }
       }

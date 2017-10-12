@@ -44,12 +44,15 @@ $images = @(Get-SCVMTemplate -VMMServer localhost |
 
 $clusters = @(Get-SCVMHostCluster -VMMServer localhost | Select -Property ClusterName,ID,Nodes)
 
+$vmnetworks = @(Get-SCVMNetwork | Select -Property ID,Name,LogicalNetwork,VMSubnet)
+
 $hash["ems"] = $ems
 $hash["hosts"] = $hosts
 $hash["vnets"] = $vnets
 $hash["clusters"] = $clusters
 $hash["images"] = $images
 $hash["vms"] = $vms
+$hash["vmnetworks"] = $vmnetworks
 
 # Maximum depth is 4 due to VMHostNetworkAdapters
 ConvertTo-Json -InputObject $hash -Depth 4 -Compress

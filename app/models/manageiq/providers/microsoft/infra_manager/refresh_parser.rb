@@ -13,7 +13,6 @@ module ManageIQ::Providers::Microsoft
       @connection         = ems.connect
       @data               = {}
       @data_index         = {}
-      @host_hash_by_name  = {}
     end
 
     def ems_inv_to_hashes
@@ -61,10 +60,19 @@ module ManageIQ::Providers::Microsoft
     def get_hosts
       hosts = @inventory['hosts']
 
+      switches = Array(@inventory['vnets'])
+      vm_networks = Array(@inventory['vmnetworks'])
+
+      switches_by_host_name = switches.group_by { |switch| switch['VMHostName'] }
+      vm_nets_by_logical_network_id = vm_networks.group_by { |vmnet| vmnet['LogicalNetwork']['ID'] }
+
       # Set VirtualSwitch as a path to LogicalNetworks, VMHostNetworkAdapters, etc.
       hosts.each do |host|
-        host['VirtualSwitch'] = @inventory['vnets'].select do |v|
-          v['VMHostName'] == host['Name']
+        host['VirtualSwitch'] = Array(switches_by_host_name[host['Name']])
+        host['VirtualSwitch'].each do |switch|
+          switch['LogicalNetworks'].each do |logical_network|
+            logical_network['VMNetworks'] = Array(vm_nets_by_logical_network_id[logical_network['ID']])
+          end
         end
       end
 
@@ -193,10 +201,35 @@ module ManageIQ::Providers::Microsoft
     end
 
     def process_logical_networks(logical_networks)
-      logical_networks.collect do |ln|
-        {
+      network_hashes = []
+
+      logical_networks.each do |ln|
+        result = {
           :name    => ln['Name'],
           :uid_ems => ln['ID'],
+        }
+
+        network_hashes << result
+
+        Array(ln['VMNetworks']).each do |vm_network|
+          network_hashes << {
+            :name    => vm_network['Name'],
+            :uid_ems => vm_network['ID'],
+            :subnets => process_subnets(vm_network),
+            :parent  => result,
+          }
+        end
+      end
+
+      network_hashes
+    end
+
+    def process_subnets(vm_network)
+      Array(vm_network['VMSubnet']).map do |subnet|
+        {
+          :type    => 'ManageIQ::Providers::Microsoft::InfraManager::Subnet',
+          :name    => subnet['Name'],
+          :ems_ref => subnet['ID'],
         }
       end
     end
