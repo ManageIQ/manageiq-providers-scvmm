@@ -91,7 +91,7 @@ module ManageIQ::Providers::Microsoft
 
       new_result = {
         :ems_ref                     => uid,
-        :name                        => File.path_to_uri(volume['SharePath']),
+        :name                        => ManageIQ::Smartstate::Util.path_to_uri(volume['SharePath']),
         :store_type                  => 'StorageFileShare',
         :total_space                 => volume['Capacity'],
         :free_space                  => volume['FreeSpace'],
@@ -108,7 +108,7 @@ module ManageIQ::Providers::Microsoft
 
       new_result = {
         :ems_ref                     => uid,
-        :name                        => File.path_to_uri(volume['Name'], volume['VMHost']),
+        :name                        => ManageIQ::Smartstate::Util.path_to_uri(volume['Name'], volume['VMHost']),
         :store_type                  => volume['FileSystem'],
         :total_space                 => volume['Capacity'],
         :free_space                  => volume['FreeSpace'],
