@@ -99,7 +99,7 @@ module ManageIQ::Providers::Microsoft
 
       new_result = {
         :ems_ref                     => uid,
-        :name                        => ManageIQ::Smartstate::Util.path_to_uri(volume['SharePath']),
+        :name                        => path_to_uri(volume['SharePath']),
         :store_type                  => 'StorageFileShare',
         :total_space                 => volume['Capacity'],
         :free_space                  => volume['FreeSpace'],
@@ -116,7 +116,7 @@ module ManageIQ::Providers::Microsoft
 
       new_result = {
         :ems_ref                     => uid,
-        :name                        => ManageIQ::Smartstate::Util.path_to_uri(volume['Name'], volume['VMHost']),
+        :name                        => path_to_uri(volume['Name'], volume['VMHost']),
         :store_type                  => volume['FileSystem'],
         :total_space                 => volume['Capacity'],
         :free_space                  => volume['FreeSpace'],
@@ -688,6 +688,12 @@ module ManageIQ::Providers::Microsoft
         @data[key] << new_result
         @data_index.store_path(key, uid, new_result)
       end
+    end
+
+    def path_to_uri(file, hostname = nil)
+      file = Addressable::URI.encode(file.tr('\\', '/'))
+      hostname = URI::Generic.build(:host => hostname).host if hostname # ensure IPv6 hostnames
+      "file://#{hostname}/#{file}"
     end
   end
 end
