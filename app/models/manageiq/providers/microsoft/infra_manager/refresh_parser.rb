@@ -230,6 +230,7 @@ module ManageIQ::Providers::Microsoft
           :type    => 'ManageIQ::Providers::Microsoft::InfraManager::Subnet',
           :name    => subnet['Name'],
           :ems_ref => subnet['ID'],
+          :cidr    => subnet['SubnetVLans']
         }
       end
     end
