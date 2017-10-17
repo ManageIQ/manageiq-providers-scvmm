@@ -230,8 +230,16 @@ module ManageIQ::Providers::Microsoft
           :type    => 'ManageIQ::Providers::Microsoft::InfraManager::Subnet',
           :name    => subnet['Name'],
           :ems_ref => subnet['ID'],
-          :cidr    => subnet['SubnetVLans']
+          :cidr    => process_cidr(subnet['SubnetVLans'])
         }
+      end
+    end
+
+    def process_cidr(string)
+      if string && string.include?('.')
+        string[/(.*?\/\d+)/, 1]
+      else
+        nil
       end
     end
 
