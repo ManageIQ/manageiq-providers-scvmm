@@ -184,9 +184,16 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
       :computed_mac_changes       => nil,
     )
 
+    expect(vm_network.parent).to_not     be_nil
+    expect(vm_network.parent.uid_ems).to eq("2babf957-ca0c-45b5-8d26-ce5a7e89e01d")
+
     expect(vm_network.switch).to_not     be_nil
     expect(vm_network.switch.uid_ems).to eq("a840681c-7459-4ba0-9dd5-a706f220822f")
-    expect(vm_network.subnets.size).to   eq(2)
+
+    expected_subnet_refs = %w(0b83d9f0-1617-4580-ae75-02d01139ed9a faecff5d-b850-4a98-9e62-2a6a8c9508e5)
+
+    expect(vm_network.subnets.size).to           eq(2)
+    expect(vm_network.subnets.map(&:ems_ref)).to match_array(expected_subnet_refs)
   end
 
   def assert_specific_subnet
