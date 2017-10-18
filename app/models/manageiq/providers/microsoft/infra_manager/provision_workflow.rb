@@ -34,6 +34,20 @@ class ManageIQ::Providers::Microsoft::InfraManager::ProvisionWorkflow < ::MiqPro
     allowed_ci(:cluster, [:host], filtered_targets.collect(&:id))
   end
 
+  def filter_hosts_by_vlan_name(all_hosts)
+    vlan_uid, vlan_name = @values[:vlan]
+    return all_hosts unless vlan_uid
+
+    _log.info("Filtering hosts with the following network: <#{vlan_name}>")
+    all_hosts.reject { |h| !h.lans.pluck(:uid_ems).include?(vlan_uid) }
+  end
+
+  def load_hosts_vlans(hosts, vlans)
+    hosts.each do |h|
+      h.lans.each { |l| vlans[l.uid_ems] = l.name unless l.switch.shared? }
+    end
+  end
+
   def allowed_subnets(_options = {})
     subnets = {}
     src = get_source_and_targets
