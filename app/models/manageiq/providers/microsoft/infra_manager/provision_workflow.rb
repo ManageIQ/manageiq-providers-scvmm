@@ -54,21 +54,24 @@ class ManageIQ::Providers::Microsoft::InfraManager::ProvisionWorkflow < ::MiqPro
   end
 
   def allowed_subnets(_options = {})
-    subnets = {}
     src = get_source_and_targets
-    return subnets if src.blank?
+    return {} if src.blank?
 
     hosts = get_selected_hosts(src)
-    load_allowed_subnets(hosts, subnets)
+    subnet_objs = all_subnets(hosts)
+    filter_subnets_by_vlan(subnet_objs)
 
-    subnets
+    subnet_objs.each_with_object({}) { |subnet, hash| hash[subnet.ems_ref] = subnet.name }
   end
 
-  def load_allowed_subnets(hosts, subnets)
-    hosts.each { |host| load_host_subnets(host, subnets) }
+  def filter_subnets_by_vlan(subnets)
+    vlan_uid, _vlan_name = @values[:vlan]
+    return if vlan_uid.nil?
+
+    subnets.reject! { |subnet| subnet.lan.uid_ems != vlan_uid }
   end
 
-  def load_host_subnets(host, subnets)
-    host.subnets.each { |s| subnets[s.ems_ref] = s.name }
+  def all_subnets(hosts)
+    hosts.flat_map(&:subnets)
   end
 end
