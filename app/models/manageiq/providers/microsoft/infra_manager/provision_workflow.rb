@@ -33,4 +33,23 @@ class ManageIQ::Providers::Microsoft::InfraManager::ProvisionWorkflow < ::MiqPro
     filtered_targets = process_filter(:cluster_filter, EmsCluster, all_clusters)
     allowed_ci(:cluster, [:host], filtered_targets.collect(&:id))
   end
+
+  def allowed_subnets(_options = {})
+    subnets = {}
+    src = get_source_and_targets
+    return subnets if src.blank?
+
+    hosts = get_selected_hosts(src)
+    load_allowed_subnets(hosts, subnets)
+
+    subnets
+  end
+
+  def load_allowed_subnets(hosts, subnets)
+    hosts.each { |host| load_host_subnets(host, subnets) }
+  end
+
+  def load_host_subnets(host, subnets)
+    host.subnets.each { |s| subnets[s.ems_ref] = s.name }
+  end
 end
