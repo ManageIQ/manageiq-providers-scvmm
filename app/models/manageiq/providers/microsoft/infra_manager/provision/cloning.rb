@@ -156,9 +156,9 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
     if results.stdout.blank?
       raise MiqException::MiqProvisionError, results.stderr
     else
-      $scvmm_log.debug(update_vm_script)
+      script = update_vm_script(results.stdout)
+      $scvmm_log.debug(script)
 
-      script  = update_vm_script(results.stdout)
       results = source.ext_management_system.run_powershell_script(script)
 
       if results.stdout.blank?
