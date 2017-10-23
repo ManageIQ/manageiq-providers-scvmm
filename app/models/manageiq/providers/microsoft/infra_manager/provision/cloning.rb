@@ -138,7 +138,7 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
 
   def update_vm_script(json)
     <<-PS_SCRIPT
-      $vm = ConvertFrom-Json #{json}; \
+      $vm = ConvertFrom-Json -InputObject '#{json}'; \
 
       Set-SCVirtualMachine -VM (Get-SCVirtualMachine -ID $vm.ID) \
         #{cpu_ps_script} \
