@@ -140,7 +140,7 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
     <<-PS_SCRIPT
       $vm = ConvertFrom-Json #{json}; \
 
-      Set-SCVirtualMachine -VM $vm \
+      Set-SCVirtualMachine -VM (Get-SCVirtualMachine -ID $vm.ID) \
         #{cpu_ps_script} \
         #{memory_ps_script} | Out-Null; \
 
