@@ -101,7 +101,28 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Provision do
 
     context "#network adapter available" do
       before do
-        @options[:vlan] = "virtualnetwork1"
+        @switch = FactoryGirl.create(:switch, :name => 'switch1')
+
+        @logical_network = FactoryGirl.create(
+          :lan,
+          :name    => 'virtualnetwork1',
+          :uid_ems => '53f38ddc-450e-4f43-abde-881ac44608e3',
+          :switch  => @switch
+        )
+
+        @vm_network = FactoryGirl.create(
+          :lan,
+          :name    => 'virtualnetwork1-vm-network',
+          :uid_ems => '243f2689-f6ef-401e-b875-41ba4c351c60',
+          :parent  => @logical_network,
+          :switch  => @switch
+        )
+
+        host = FactoryGirl.create(:host_microsoft, :ems_ref => "test_ref")
+        host.switches = [@switch]
+
+        @options[:vlan] = [@logical_network.uid_ems, @logical_network.name]
+        allow(vm_prov).to receive(:dest_host).and_return(host)
       end
 
       it "set adapter" do
