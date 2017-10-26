@@ -130,6 +130,8 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
   end
 
   def logical_network_ps_script
+    return unless dest_vm_network.nil?
+
     logical_network = dest_logical_network
     return if logical_network.nil?
 
@@ -140,7 +142,7 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
     vm_network = dest_vm_network
     return if vm_network.nil?
 
-    "-VMNetwork (Get-SCVMNetwork -Name '#{vm_network.name}') "
+    "-VMNetwork (Get-SCVMNetwork -Name '#{vm_network.name}') -VirtualNetwork #{vm_network.switch.name} #{subnet_ps_script} "
   end
 
   def subnet_ps_script
@@ -159,7 +161,7 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
     "$adapter = $vm | SCVirtualNetworkAdapter; \
      Set-SCVirtualNetworkAdapter \
       -VirtualNetworkAdapter $adapter \
-      #{logical_network_ps_script}#{vm_network_ps_script}#{subnet_ps_script}| Out-Null;"
+      #{dest_vm_network.nil? ? logical_network_ps_script : vm_network_ps_script}| Out-Null;"
   end
 
   def create_vm_script
