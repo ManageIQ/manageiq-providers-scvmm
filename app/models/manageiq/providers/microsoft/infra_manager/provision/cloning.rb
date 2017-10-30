@@ -39,8 +39,38 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
     URI.decode(name.to_s).tr('/', '\\')
   end
 
-  def dest_virtual_network
-    get_option(:vlan)
+  def dest_logical_network
+    network_uid, _ = options[:vlan]
+    return if network_uid.nil?
+
+    lan = dest_host.lans.find_by(:uid_ems => network_uid)
+    return if lan.nil?
+
+    # If there is a lan parent then the selected vlan is a
+    # VM Network and we want to return its parent as the
+    # Logical Network
+    if lan.parent.nil?
+      lan
+    else
+      lan.parent
+    end
+  end
+
+  def dest_vm_network
+    network_uid, _ = options[:vlan]
+    return if network_uid.nil?
+
+    lan = dest_host.lans.find_by(:uid_ems => network_uid)
+    return if lan.nil?
+
+    return lan unless lan.parent.nil? # All VM Networks will have a parent
+  end
+
+  def dest_subnet
+    subnet_ems_ref = get_option(:subnet)
+    return if subnet_ems_ref.nil?
+
+    dest_host.subnets.find_by(:ems_ref => subnet_ems_ref)
   end
 
   def startup_ram
@@ -100,11 +130,30 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
   end
 
   def logical_network_ps_script
-    "(Get-SCLogicalNetwork -Name '#{dest_virtual_network}')"
+    return unless dest_vm_network.nil?
+
+    logical_network = dest_logical_network
+    return if logical_network.nil?
+
+    "-LogicalNetwork (Get-SCLogicalNetwork -Name '#{logical_network.name}') "
+  end
+
+  def vm_network_ps_script
+    vm_network = dest_vm_network
+    return if vm_network.nil?
+
+    "-VMNetwork (Get-SCVMNetwork -Name '#{vm_network.name}') -VirtualNetwork #{vm_network.switch.name} #{subnet_ps_script} "
+  end
+
+  def subnet_ps_script
+    subnet = dest_subnet
+    return if subnet.nil?
+
+    "-VMSubnet (Get-SCVMSubnet -Name '#{subnet.name}') "
   end
 
   def network_adapter_ps_script
-    if dest_virtual_network.nil?
+    if dest_logical_network.nil?
       $scvmm_log.info("Virtual Network is not available, network adapter will not be set")
       return
     end
@@ -112,7 +161,7 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
     "$adapter = $vm | SCVirtualNetworkAdapter; \
      Set-SCVirtualNetworkAdapter \
       -VirtualNetworkAdapter $adapter \
-      -LogicalNetwork #{logical_network_ps_script} | Out-Null;"
+      #{dest_vm_network.nil? ? logical_network_ps_script : vm_network_ps_script}| Out-Null;"
   end
 
   def create_vm_script

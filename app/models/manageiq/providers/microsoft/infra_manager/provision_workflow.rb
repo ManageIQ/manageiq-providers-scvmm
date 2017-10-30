@@ -33,4 +33,45 @@ class ManageIQ::Providers::Microsoft::InfraManager::ProvisionWorkflow < ::MiqPro
     filtered_targets = process_filter(:cluster_filter, EmsCluster, all_clusters)
     allowed_ci(:cluster, [:host], filtered_targets.collect(&:id))
   end
+
+  def filter_hosts_by_vlan_name(all_hosts)
+    vlan_uid, vlan_name = @values[:vlan]
+    return all_hosts unless vlan_uid
+
+    _log.info("Filtering hosts with the following network: <#{vlan_name}>")
+    all_hosts.reject { |h| !h.lans.pluck(:uid_ems).include?(vlan_uid) }
+  end
+
+  def load_hosts_vlans(hosts, vlans)
+    hosts.each do |h|
+      h.lans.each do |l|
+        next if l.switch.shared?
+
+        lan_name = l.parent.nil? ? l.name : "#{l.parent.name} / #{l.name}"
+        vlans[l.uid_ems] = lan_name
+      end
+    end
+  end
+
+  def allowed_subnets(_options = {})
+    src = get_source_and_targets
+    return {} if src.blank?
+
+    hosts = get_selected_hosts(src)
+    subnet_objs = all_subnets(hosts)
+    filter_subnets_by_vlan(subnet_objs)
+
+    subnet_objs.each_with_object({}) { |subnet, hash| hash[subnet.ems_ref] = subnet.name }
+  end
+
+  def filter_subnets_by_vlan(subnets)
+    vlan_uid, _vlan_name = @values[:vlan]
+    return if vlan_uid.nil?
+
+    subnets.reject! { |subnet| subnet.lan.uid_ems != vlan_uid }
+  end
+
+  def all_subnets(hosts)
+    hosts.flat_map(&:subnets)
+  end
 end
