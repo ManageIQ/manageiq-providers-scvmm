@@ -37,14 +37,37 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     URI::HTTP.build(:host => hostname, :port => port || 5985, :path => "/wsman").to_s
   end
 
+  def self.build_connect_params(options)
+    connect_params  = {
+      :user         => options[:user],
+      :password     => options[:password],
+      :endpoint     => options[:endpoint] || auth_url(options[:hostname], options[:port]),
+      :disable_sspi => true
+    }
+
+    if options[:security_protocol] == "kerberos"
+      connect_params.merge!(
+        :realm           => options[:realm],
+        :basic_auth_only => false,
+        :disable_sspi    => false
+      )
+    end
+
+    connect_params
+  end
+
   def connect(options = {})
     raise "no credentials defined" if self.missing_credentials?(options[:auth_type])
 
     hostname           = options[:hostname] || self.hostname
     options[:endpoint] = self.class.auth_url(hostname, port)
-    connect_params     = build_connect_params(options)
+    options[:user]   ||= authentication_userid(options[:auth_type])
+    options[:password] = options[:password] || authentication_password(options[:auth_type])
 
-    self.class.raw_connect(connect_params)
+    options[:realm]             = realm
+    options[:security_protocol] = security_protocol
+
+    self.class.raw_connect(self.class.build_connect_params(options))
   end
 
   def verify_credentials(_auth_type = nil, options = {})
@@ -138,24 +161,5 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     command = "powershell Import-Module VirtualMachineManager; Get-SCVMMServer localhost;\
       #{cmdlet}-SCVirtualMachine -VM (Get-SCVirtualMachine -ID #{vm_uid_ems}) #{params}"
     run_dos_command(command)
-  end
-
-  def build_connect_params(options)
-    connect_params  = {
-      :user         => options[:user]     || authentication_userid(options[:auth_type]),
-      :password     => MiqPassword.try_decrypt(options[:password]) || authentication_password(options[:auth_type]),
-      :endpoint     => options[:endpoint],
-      :disable_sspi => true
-    }
-
-    if security_protocol == "kerberos"
-      connect_params.merge!(
-        :realm           => realm,
-        :basic_auth_only => false,
-        :disable_sspi    => false
-      )
-    end
-
-    connect_params
   end
 end
