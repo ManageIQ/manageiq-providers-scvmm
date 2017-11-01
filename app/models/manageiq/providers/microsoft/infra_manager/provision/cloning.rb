@@ -135,21 +135,21 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
     logical_network = dest_logical_network
     return if logical_network.nil?
 
-    "-LogicalNetwork (Get-SCLogicalNetwork -Name '#{logical_network.name}') "
+    "-LogicalNetwork (Get-SCLogicalNetwork -Name '#{logical_network.name}' -ID '#{logical_network.uid_ems}') "
   end
 
   def vm_network_ps_script
     vm_network = dest_vm_network
     return if vm_network.nil?
 
-    "-VMNetwork (Get-SCVMNetwork -Name '#{vm_network.name}') -VirtualNetwork #{vm_network.switch.name} #{subnet_ps_script} "
+    "-VMNetwork (Get-SCVMNetwork -Name '#{vm_network.name}' -ID '#{vm_network.uid_ems}') -VirtualNetwork #{vm_network.switch.name} #{subnet_ps_script}"
   end
 
   def subnet_ps_script
     subnet = dest_subnet
     return if subnet.nil?
 
-    "-VMSubnet (Get-SCVMSubnet -Name '#{subnet.name}') "
+    "-VMSubnet (Get-SCVMSubnet -Name '#{subnet.name}' | where {$_.VMNetwork.ID -eq '#{subnet.lan.uid_ems}'}) "
   end
 
   def network_adapter_ps_script
@@ -161,7 +161,8 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
     "$adapter = $vm | SCVirtualNetworkAdapter; \
      Set-SCVirtualNetworkAdapter \
       -VirtualNetworkAdapter $adapter \
-      #{dest_vm_network.nil? ? logical_network_ps_script : vm_network_ps_script}| Out-Null;"
+      #{dest_vm_network.nil? ? logical_network_ps_script : vm_network_ps_script} \
+      -IPv4AddressType Dynamic -IPv6AddressType Dynamic -NoPortClassification | Out-Null;"
   end
 
   def create_vm_script
