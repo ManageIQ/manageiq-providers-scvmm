@@ -30,7 +30,9 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     connect = WinRM::Connection.new(connect_params)
     return connect unless validate
 
-    connect.shell(:powershell).run('hostname')
+    connection_rescue_block do
+      connect.shell(:powershell).run('hostname')
+    end
   end
 
   def self.auth_url(hostname, port = nil)
@@ -56,8 +58,21 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     connect_params
   end
 
+  def self.connection_rescue_block(realm = nil)
+    require 'winrm'
+    require 'gssapi' # A winrm dependency
+    yield
+  rescue WinRM::WinRMHTTPTransportError => e # Error 401
+    raise MiqException::MiqHostError, "Check credentials and WinRM configuration settings. " \
+    "Remote error message: #{e.message}"
+  rescue GSSAPI::GssApiError
+    raise MiqException::MiqHostError, "Unable to reach any KDC in realm #{realm}"
+  rescue => e
+    raise MiqException::MiqHostError, "Unable to connect: #{e.message}"
+  end
+
   def connect(options = {})
-    raise "no credentials defined" if self.missing_credentials?(options[:auth_type])
+    raise "no credentials defined" if missing_credentials?(options[:auth_type])
 
     hostname           = options[:hostname] || self.hostname
     options[:endpoint] = self.class.auth_url(hostname, port)
@@ -71,20 +86,10 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
   end
 
   def verify_credentials(_auth_type = nil, options = {})
-    require 'winrm'
-    require 'gssapi' # A winrm dependency
+    raise MiqException::MiqHostError, "No credentials defined" if missing_credentials?(options[:auth_type])
 
-    raise MiqException::MiqHostError, "No credentials defined" if self.missing_credentials?(options[:auth_type])
-
-    begin
+    self.class.connection_rescue_block do
       run_dos_command("hostname")
-    rescue WinRM::WinRMHTTPTransportError => e # Error 401
-      raise MiqException::MiqHostError, "Check credentials and WinRM configuration settings. " \
-      "Remote error message: #{e.message}"
-    rescue GSSAPI::GssApiError
-      raise MiqException::MiqHostError, "Unable to reach any KDC in realm #{realm}"
-    rescue => e
-      raise MiqException::MiqHostError, "Unable to connect: #{e.message}"
     end
 
     true
