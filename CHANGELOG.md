@@ -24,5 +24,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 ### Fixed
 - Move path_to_uri to SCVMM refresh parser [(#22)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/22)
+- Move build_connect_params to a class method [(#34)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/34)
+- Fix VM Subnet Provisioning [(#39)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/39)
+- Fix exception handing for credential validation on raw_connect [(#41)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/41)
 
 ## Initial changelog added
