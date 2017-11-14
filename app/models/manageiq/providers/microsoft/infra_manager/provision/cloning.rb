@@ -169,7 +169,7 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
     <<-PS_SCRIPT
       Import-Module VirtualMachineManager | Out-Null; \
 
-      $template = Get-SCVMTemplate -Name '#{source.name}'; \
+      $template = Get-SCVMTemplate -Name '#{source.name}' -VMMServer localhost; \
       $vmconfig = New-SCVMConfiguration -VMTemplate $template -Name 'ManageIQConfig-#{dest_name}'; \
       $vmhost   = Get-SCVMHost -ComputerName '#{dest_host}'; \
 
