@@ -24,6 +24,7 @@ $hosts = @(Get-SCVMHost -VMMServer localhost |
     HyperVStateString,ID,LogicalProcessorCount,Name,OperatingSystem,OverallState,PhysicalCPUCount,
     ProcessorFamily,ProcessorManufacturer,ProcessorModel,ProcessorSpeed,
     RegisteredStorageFileShares, TotalMemory,
+    @{name='SMBiosGUIDString';expression={$_.PhysicalMachine.SMBiosGUID -As [string]}},
     @{name='HyperVVersionString';expression={$_.HyperVVersion -As [string]}},
     @{name='OperatingSystemVersionString';expression={$_.OperatingSystemVersion -As [string]}},
     @{name='VirtualizationPlatformString';expression={$_.VirtualizationPlatform -As [string]}})

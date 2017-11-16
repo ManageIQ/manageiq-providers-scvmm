@@ -42,24 +42,24 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     expect(EmsCluster.count).to eq(1)
     expect(Host.count).to eq(3)
     expect(ResourcePool.count).to eq(0)
-    expect(Vm.count).to eq(29)
-    expect(VmOrTemplate.count).to eq(52)
+    expect(Vm.count).to eq(28)
+    expect(VmOrTemplate.count).to eq(50)
     expect(CustomAttribute.count).to eq(0)
     expect(CustomizationSpec.count).to eq(0)
-    expect(Disk.count).to eq(62)
+    expect(Disk.count).to eq(61)
     expect(GuestDevice.count).to eq(11)
-    expect(Hardware.count).to eq(55)
-    expect(Lan.count).to eq(48)
-    expect(Subnet.count).to eq(12)
+    expect(Hardware.count).to eq(53)
+    expect(Lan.count).to eq(54)
+    expect(Subnet.count).to eq(16)
     expect(MiqScsiLun.count).to eq(0)
     expect(MiqScsiTarget.count).to eq(0)
-    expect(Network.count).to eq(29)
-    expect(OperatingSystem.count).to eq(55)
+    expect(Network.count).to eq(28)
+    expect(OperatingSystem.count).to eq(53)
     expect(Snapshot.count).to eq(7)
     expect(Switch.count).to eq(6)
     expect(SystemService.count).to eq(0)
-    expect(Relationship.count).to eq(59)
-    expect(MiqQueue.count).to eq(52)
+    expect(Relationship.count).to eq(57)
+    expect(MiqQueue.count).to eq(50)
     expect(Storage.count).to eq(15)
   end
 
@@ -75,12 +75,12 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
 
     expect(@ems.storages.size).to eq(14)
     expect(@ems.hosts.size).to eq(3)
-    expect(@ems.vms_and_templates.size).to eq(52)
-    expect(@ems.vms.size).to eq(29)
-    expect(@ems.miq_templates.size).to eq(23)
+    expect(@ems.vms_and_templates.size).to eq(50)
+    expect(@ems.vms.size).to eq(28)
+    expect(@ems.miq_templates.size).to eq(22)
     expect(@ems.customization_specs.size).to eq(0)
-    expect(@ems.lans.size).to eq(48)
-    expect(@ems.subnets.size).to eq(12)
+    expect(@ems.lans.size).to eq(54)
+    expect(@ems.subnets.size).to eq(16)
   end
 
   def assert_specific_storage
@@ -133,6 +133,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     )
 
     expect(@host.hardware).to have_attributes(
+      :serial_number        => '463b9e30-9f60-e011-8346-5cf3fc1c83ec',
       :cpu_speed            => 2133,
       :cpu_type             => "Intel Xeon 179",
       :manufacturer         => "Intel",
