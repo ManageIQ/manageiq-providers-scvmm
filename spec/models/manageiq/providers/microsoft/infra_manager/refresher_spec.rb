@@ -133,6 +133,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     )
 
     expect(@host.hardware).to have_attributes(
+      :serial_number        => '463b9e30-9f60-e011-8346-5cf3fc1c83ec',
       :cpu_speed            => 2133,
       :cpu_type             => "Intel Xeon 179",
       :manufacturer         => "Intel",
