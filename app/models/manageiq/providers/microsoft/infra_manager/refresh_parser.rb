@@ -317,6 +317,7 @@ module ManageIQ::Providers::Microsoft
       cpu_family       = host['ProcessorFamily']
       cpu_manufacturer = host['ProcessorManufacturer']
       cpu_model        = host['ProcessorModel']
+      serial_number    = host['SMBiosGUIDString'].blank? ? nil : host['SMBiosGUIDString']
 
       {
         :cpu_type             => "#{cpu_manufacturer} #{cpu_model} #{cpu_family}",
@@ -328,6 +329,7 @@ module ManageIQ::Providers::Microsoft
         :cpu_total_cores      => host['LogicalProcessorCount'],
         :cpu_cores_per_socket => host['CoresPerCPU'],
         :guest_devices        => process_host_guest_devices(host),
+        :serial_number        => serial_number
       }
     end
 
