@@ -480,14 +480,30 @@ module ManageIQ::Providers::Microsoft
 
     def process_vm_guest_devices(vm)
       devices = []
-      return devices if vm['VirtualDVDDrives'].blank?
 
-      vm['VirtualDVDDrives'].each do |dvd|
-        devices.concat(process_vm_physical_dvd_drive(dvd)) unless dvd['HostDrive'].blank?
+      vm['VirtualNetworkAdapters'].to_a.each do |vnic|
+        devices << process_vm_virtual_nic(vnic)
+      end
+
+      vm['VirtualDVDDrives'].to_a.each do |dvd|
+        devices << process_vm_physical_dvd_drive(dvd) unless dvd['HostDrive'].blank?
       end
 
       devices.concat(process_iso_image(vm['DVDISO'])) unless vm['DVDISO'].blank?
+
       devices.flatten.compact.uniq
+    end
+
+    def process_vm_virtual_nic(vnic)
+      {
+        :uid_ems         => vnic['ID'],
+        :present         => vnic['Enabled'],
+        :start_connected => vnic['Enabled'],
+        :address         => vnic['MACAddress'],
+        :device_name     => vnic['Name'],
+        :device_type     => 'ethernet',
+        :controller_type => 'ethernet',
+      }
     end
 
     def process_vm_physical_dvd_drive(dvd)
