@@ -47,7 +47,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     expect(CustomAttribute.count).to eq(0)
     expect(CustomizationSpec.count).to eq(0)
     expect(Disk.count).to eq(61)
-    expect(GuestDevice.count).to eq(11)
+    expect(GuestDevice.count).to eq(39)
     expect(Hardware.count).to eq(53)
     expect(Lan.count).to eq(54)
     expect(Subnet.count).to eq(16)
@@ -288,13 +288,22 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     v1 = ManageIQ::Providers::Microsoft::InfraManager::Vm.find_by(:name => "centos7min-vm")
     v2 = ManageIQ::Providers::Microsoft::InfraManager::Vm.find_by(:name => "DualDVDa")
 
-    expect(v0.hardware.guest_devices.size).to eq(0)
-    expect(v1.hardware.guest_devices.size).to eq(1)
-    expect(v2.hardware.guest_devices.size).to eq(2)
+    expect(v0.hardware.guest_devices.size).to eq(1)
+    expect(v1.hardware.guest_devices.size).to eq(2)
+    expect(v2.hardware.guest_devices.size).to eq(3)
 
-    expect(v0.hardware.guest_devices).to be_empty
+    expect(v0.hardware.guest_devices.first).to have_attributes(
+      :uid_ems         => "07be840c-12a1-4ff6-a8ce-72dd0c90ae72",
+      :device_name     => "cfme-vmm-ad-bu-DND",
+      :device_type     => "ethernet",
+      :controller_type => "ethernet",
+      :address         => "00:15:5D:04:2F:24",
+      :present         => true,
+      :start_connected => true,
+    )
 
-    expect(v1.hardware.guest_devices.first).to have_attributes(
+    v1_cdroms = v1.hardware.guest_devices.select { |dev| dev[:device_type] == "cdrom" }
+    expect(v1_cdroms.first).to have_attributes(
       :device_name     => "vmguest",
       :device_type     => "cdrom",
       :filename        => "C:\\Windows\\system32\\vmguest.iso",
@@ -303,7 +312,8 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
       :start_connected => true,
     )
 
-    expect(v2.hardware.guest_devices.order(:device_name).first).to have_attributes(
+    v2_cdroms = v2.hardware.guest_devices.order(:device_name).select { |dev| dev[:device_type] == "cdrom" }
+    expect(v2_cdroms.first).to have_attributes(
       :device_name     => "en_office_professional_plus_2016_x86_x64_dvd_6962141",
       :device_type     => "cdrom",
       :filename        => "C:\\tmp\\en_office_professional_plus_2016_x86_x64_dvd_6962141.iso",
@@ -312,7 +322,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
       :start_connected => true,
     )
 
-    expect(v2.hardware.guest_devices.order(:device_name).last).to have_attributes(
+    expect(v2_cdroms.last).to have_attributes(
       :device_name     => "en_visio_professional_2016_x86_x64_dvd_6962139",
       :device_type     => "cdrom",
       :filename        => "C:\\tmp\\en_visio_professional_2016_x86_x64_dvd_6962139.iso",
