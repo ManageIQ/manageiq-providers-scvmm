@@ -402,8 +402,6 @@ module ManageIQ::Providers::Microsoft
 
     def process_vm_hardware(vm)
       {
-        :cpu_sockets          => vm['CPUCount'],
-        :cpu_cores_per_socket => 1,
         :cpu_total_cores      => vm['CPUCount'],
         :guest_os             => vm['OperatingSystem']['Name'],
         :guest_os_full_name   => process_vm_os_description(vm),
