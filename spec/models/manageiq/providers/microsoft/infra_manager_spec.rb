@@ -95,4 +95,12 @@ describe ManageIQ::Providers::Microsoft::InfraManager do
       described_class.raw_connect(params)
     end
   end
+
+  context 'catalog types' do
+    let(:ems) { FactoryGirl.create(:ems_microsoft) }
+
+    it "#supported_catalog_types" do
+      expect(ems.supported_catalog_types).to eq(%w(microsoft))
+    end
+  end
 end
