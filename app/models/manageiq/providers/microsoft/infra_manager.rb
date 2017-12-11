@@ -95,6 +95,10 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     true
   end
 
+  def supported_catalog_types
+    %w(microsoft)
+  end
+
   def vm_start(vm, _options = {})
     case vm.power_state
     when "suspended" then execute_power_operation("Resume", vm.uid_ems)
