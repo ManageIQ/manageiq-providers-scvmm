@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
+## Gaprindashvili RC
+
+### Added
+- Add translations [(#47)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/47)
+
+### Fixed
+- Don't report misleading sockets/cores [(#51)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/51)
+- Fix host maintenance mode [(#53)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/53)
+- Added supported_catalog_types [(#54)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/54)
+
 ## Gaprindashvili Beta2
 
 ### Fixed
