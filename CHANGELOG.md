@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
+## Unreleased as of Sprint 75 ending 2017-12-11
+
+### Added
+- Parse NICs as guest_devices [(#50)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/50)
+
+### Fixed
+- Added supported_catalog_types [(#54)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/54)
+- Fix host maintenance mode [(#53)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/53)
+- Don't report misleading sockets/cores [(#51)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/51)
+
 ## Unreleased as of Sprint 74 ending 2017-11-27
 
 ### Fixed
