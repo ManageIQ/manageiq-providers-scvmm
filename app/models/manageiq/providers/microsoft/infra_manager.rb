@@ -158,6 +158,10 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     raise
   end
 
+  def self.display_name(number = 1)
+    n_('Infrastructure Provider (Microsoft)', 'Infrastructure Providers (Microsoft)', number)
+  end
+
   private
 
   def execute_power_operation(cmdlet, vm_uid_ems, *parameters)

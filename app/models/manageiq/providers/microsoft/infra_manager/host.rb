@@ -31,4 +31,8 @@ class ManageIQ::Providers::Microsoft::InfraManager::Host < ::Host
     user, pass = auth_user_pwd(auth_type)
     MiqScvmmVmSSAInfo.new(hostname, user, pass)
   end
+
+  def self.display_name(number = 1)
+    n_('Host (Microsoft)', 'Hosts (Microsoft)', number)
+  end
 end
