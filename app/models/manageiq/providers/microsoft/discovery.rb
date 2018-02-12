@@ -17,8 +17,8 @@ module ManageIQ
 
         def self.probe(ost)
           ost.hypervisor << :msvirtualserver if ManageIQ::Network::Port.open?(ost, VIRTUAL_SERVER_PORT)
-          ost.hypervisor << :scvmm if ManageIQ::Network::Port.scan_open(ost, SCVMM_PORTS).length == 3
-          ost.os << :mswin  if ManageIQ::Network::Port.scan_open(ost, MSWIN_PORTS).length == 2
+          ost.hypervisor << :scvmm if ManageIQ::Network::Port.all_open?(ost, SCVMM_PORTS)
+          ost.os << :mswin  if ManageIQ::Network::Port.all_open?(ost, MSWIN_PORTS)
         end
       end
     end
