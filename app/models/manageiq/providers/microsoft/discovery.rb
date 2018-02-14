@@ -1,4 +1,4 @@
-require 'manageiq/network/port'
+require 'manageiq/network_discover/port'
 
 module ManageIQ
   module Providers
@@ -16,9 +16,9 @@ module ManageIQ
         VIRTUAL_SERVER_PORT = 5900 # Microsoft Virtual Machine Remote Control Client
 
         def self.probe(ost)
-          ost.hypervisor << :msvirtualserver if ManageIQ::Network::Port.open?(ost, VIRTUAL_SERVER_PORT)
-          ost.hypervisor << :scvmm if ManageIQ::Network::Port.all_open?(ost, SCVMM_PORTS)
-          ost.os << :mswin  if ManageIQ::Network::Port.all_open?(ost, MSWIN_PORTS)
+          ost.hypervisor << :msvirtualserver if ManageIQ::NetworkDiscover::Port.open?(ost, VIRTUAL_SERVER_PORT)
+          ost.hypervisor << :scvmm if ManageIQ::NetworkDiscover::Port.all_open?(ost, SCVMM_PORTS)
+          ost.os << :mswin  if ManageIQ::NetworkDiscover::Port.all_open?(ost, MSWIN_PORTS)
         end
       end
     end
