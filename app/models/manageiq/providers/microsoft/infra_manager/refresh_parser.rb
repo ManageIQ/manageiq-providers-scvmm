@@ -22,7 +22,7 @@ module ManageIQ::Providers::Microsoft
       script = IO.read(INVENTORY_SCRIPT)
       @inventory = ManageIQ::Providers::Microsoft::InfraManager.execute_powershell_json(@connection, script)
 
-      if @inventory.empty?
+      if @inventory.empty? || @inventory['ems'].empty?
         $scvmm_log.warn("#{log_header}...Empty inventory set returned from SCVMM.")
         return
       end
