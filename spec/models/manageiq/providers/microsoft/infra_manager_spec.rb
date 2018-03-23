@@ -75,15 +75,27 @@ describe ManageIQ::Providers::Microsoft::InfraManager do
 
   context "#raw_connect with validation" do
     it "validates the connection if validate is true" do
-      require 'winrm'
-      connection, powershell = double, double
+      response = double(:winrm_output)
+      output = "{\"ems\":{\"Guid\":\"a2b45b8b-ff0e-425c-baf7-24626963a27c\",\"Version\":\"2.1.0\"}}"
+      allow(response).to receive(:stdout).and_return(output)
+
+      allow(ManageIQ::Providers::Microsoft::InfraManager).to receive(:run_powershell_script).and_return(response)
+
       params = { :endpoint => "http://host2:5985/wsman", :user => "user", :password => "password" }
-      allow(WinRM::Connection).to receive(:new).with(params).and_return(connection)
-
-      expect(connection).to receive(:shell).with(:powershell).and_return(powershell)
-      expect(powershell).to receive(:run).with('hostname')
-
       described_class.raw_connect(params, true)
+    end
+
+    it "raises an exception if validation fails" do
+      response = double(:winrm_output)
+      output = "{\"ems\":null}"
+      error = "FAILURE\r\nMULTILINE FAILURE"
+      allow(response).to receive(:stdout).and_return(output)
+      allow(response).to receive(:stderr).and_return(error)
+
+      allow(ManageIQ::Providers::Microsoft::InfraManager).to receive(:run_powershell_script).and_return(response)
+
+      params = { :endpoint => "http://host2:5985/wsman", :user => "user", :password => "password" }
+      expect { described_class.raw_connect(params, true) }.to raise_exception(MiqException::MiqHostError, "Unable to connect: FAILURE")
     end
 
     it "decrypts the password" do
