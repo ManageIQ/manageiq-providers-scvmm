@@ -31,9 +31,17 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     return connect unless validate
 
     connection_rescue_block do
-      connect.shell(:powershell).run('hostname')
+      results = run_test_connection_script
+      json = parse_json_results(results.stdout)
+      raise results.stderr.split("\r\n").first if json.blank? || json["ems"].blank?
     end
   end
+
+  def self.run_test_connection_script
+    test_connection_script = File.join(File.dirname(__FILE__), 'infra_manager/ps_scripts/test_connection.ps1')
+    run_powershell_script(connection, IO.read(test_connection_script))
+  end
+  private_class_method :run_test_connection_script
 
   def self.auth_url(hostname, port = nil)
     URI::HTTP.build(:host => hostname, :port => port || 5985, :path => "/wsman").to_s
@@ -82,14 +90,16 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     options[:realm]             = realm
     options[:security_protocol] = security_protocol
 
-    self.class.raw_connect(self.class.build_connect_params(options))
+    options[:validate] ||= false
+
+    self.class.raw_connect(self.class.build_connect_params(options), options[:validate])
   end
 
   def verify_credentials(_auth_type = nil, options = {})
     raise MiqException::MiqHostError, "No credentials defined" if missing_credentials?(options[:auth_type])
 
     self.class.connection_rescue_block do
-      run_dos_command("hostname")
+      connect(:validate => true)
     end
 
     true
