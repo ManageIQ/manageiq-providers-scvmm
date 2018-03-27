@@ -33,4 +33,8 @@ class ManageIQ::Providers::Microsoft::InfraManager::Vm < ManageIQ::Providers::In
   def has_proxy?
     true
   end
+
+  def self.display_name(number = 1)
+    n_('Virtual Machine (Microsoft)', 'Virtual Machines (Microsoft)', number)
+  end
 end
