@@ -31,13 +31,13 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     return connect unless validate
 
     connection_rescue_block do
-      results = run_test_connection_script
+      results = run_test_connection_script(connect)
       json = parse_json_results(results.stdout)
       raise results.stderr.split("\r\n").first if json.blank? || json["ems"].blank?
     end
   end
 
-  def self.run_test_connection_script
+  def self.run_test_connection_script(connection)
     test_connection_script = File.join(File.dirname(__FILE__), 'infra_manager/ps_scripts/test_connection.ps1')
     run_powershell_script(connection, IO.read(test_connection_script))
   end
