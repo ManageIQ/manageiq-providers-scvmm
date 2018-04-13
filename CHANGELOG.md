@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
+## Unreleased as of Sprint 82 - 2018-03-26
+
+### Fixed
+- Check connection to VMM when verifying credentials [(#66)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/66)
+- Handle nil ems inventory from insufficient privileges credential issues [(#65)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/65)
+- Migrate model display names from locale/en.yml to plugin [(#60)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/60)
+
 ## Gaprindashvili-1 - Released 2018-01-31
 
 ### Added
