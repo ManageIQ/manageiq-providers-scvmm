@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
+## Unreleased as of Sprint 84 - 2018-04-26
+
+### Fixed
+- Fix SCVMM Test Connection Method [(#68)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/68)
+
 ## Unreleased as of Sprint 82 - 2018-03-26
 
 ### Fixed
