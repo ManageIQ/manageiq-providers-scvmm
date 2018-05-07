@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
-## Gaprindashvili-1
+## Gaprindashvili-3
+
+### Fixed
+- Handle nil ems inventory from insufficient privileges credential issues [(#65)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/65)
+- Check connection to VMM when verifying credentials [(#66)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/66)
+- Fix SCVMM Test Connection Method [(#68)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/68)
+
+## Gaprindashvili-1 - Release 2018-02-01
 
 ### Added
 - Add translations [(#47)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/47)
