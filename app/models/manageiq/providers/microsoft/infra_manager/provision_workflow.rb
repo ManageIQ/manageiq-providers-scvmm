@@ -43,13 +43,15 @@ class ManageIQ::Providers::Microsoft::InfraManager::ProvisionWorkflow < ::MiqPro
   end
 
   def load_hosts_vlans(hosts, vlans)
-    hosts.each do |h|
-      h.lans.each do |l|
-        next if l.switch.shared?
+    lans_for_hosts = Lan.distinct.select(:id, :switch_id, :uid_ems, :name)
+                        .includes(:parent)
+                        .joins(:switch => :host_switches)
+                        .where(:host_switches => {:host_id => hosts.map(&:id)})
+                        .where(:switches => {:shared => [nil, false]})
 
-        lan_name = l.parent.nil? ? l.name : "#{l.parent.name} / #{l.name}"
-        vlans[l.uid_ems] = lan_name
-      end
+    lans_for_hosts.each do |l|
+      lan_name = l.parent.nil? ? l.name : "#{l.parent.name} / #{l.name}"
+      vlans[l.uid_ems] = lan_name
     end
   end
 
