@@ -60,7 +60,7 @@ module ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared::Scannin
     if miq_vm_host
       st = Time.now.getlocal
       use_broker = false
-      miq_vm_host[:address] = miq_vm_host[:ipaddress] if miq_vm_host[:address].nil?
+      miq_vm_host[:address] = miq_vm_host[:hostname] || miq_vm_host[:ipaddress]
       ems_text = "#{ems_connect_type}(#{use_broker ? 'via broker' : 'directly'}):#{miq_vm_host[:address]}"
       log_text = "#{log_header}: Connection to [#{ems_text}]"
       $log.info "#{log_header}: Connecting to [#{ems_text}] for VM:[#{vm_name}]"
@@ -90,7 +90,7 @@ module ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared::Scannin
         $log.error msg
         raise err, msg, err.backtrace
       ensure
-        ost.miq_scvmm.close
+        ost.miq_scvmm.close if ost.miq_scvmm
       end
     end
   end
