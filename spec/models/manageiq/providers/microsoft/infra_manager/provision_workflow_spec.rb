@@ -16,6 +16,21 @@ describe ManageIQ::Providers::Microsoft::InfraManager::ProvisionWorkflow do
     described_class.new({}, admin.userid)
   end
 
+  describe "#load_hosts_vlans" do
+    let(:host)        { FactoryGirl.create(:host_with_ref, :switches => [switch]) }
+    let(:switch)      { FactoryGirl.create(:switch) }
+    let!(:lan_parent) { FactoryGirl.create(:lan, :switch => switch) }
+    let!(:lan)        { FactoryGirl.create(:lan, :parent => lan_parent, :switch => switch) }
+
+    it "includes parent lans" do
+      stub_dialog
+      prov_workflow = described_class.new({}, admin.userid)
+      lan_for_host = prov_workflow.load_hosts_vlans([host], {}).detect(&:parent)
+      expect(lan_for_host).to be_a(Lan)
+      expect(lan_for_host.parent).to be_a(Lan)
+    end
+  end
+
   describe "#make_request" do
     let(:alt_user) { FactoryGirl.create(:user_with_group) }
     it "creates and update a request" do
