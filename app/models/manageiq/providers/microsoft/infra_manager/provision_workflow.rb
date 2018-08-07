@@ -43,7 +43,7 @@ class ManageIQ::Providers::Microsoft::InfraManager::ProvisionWorkflow < ::MiqPro
   end
 
   def load_hosts_vlans(hosts, vlans)
-    lans_for_hosts = Lan.distinct.select(:id, :switch_id, :uid_ems, :name)
+    lans_for_hosts = Lan.distinct.select(:id, :switch_id, :uid_ems, :name, :parent_id)
                         .includes(:parent)
                         .joins(:switch => :host_switches)
                         .where(:host_switches => {:host_id => hosts.map(&:id)})
