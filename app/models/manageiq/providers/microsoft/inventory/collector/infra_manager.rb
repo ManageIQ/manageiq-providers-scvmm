@@ -14,6 +14,39 @@ class ManageIQ::Providers::Microsoft::Inventory::Collector::InfraManager < Manag
     @inventory ||= collect!
   end
 
+  def ems
+    inventory["ems"] || {}
+  end
+
+  def volumes
+    @volumes ||= begin
+      hosts.collect { |host| host["DiskVolumes"] }.flatten
+           .reject { |volume| volume["VolumeLabel"] == "System Reserved" }
+    end
+  end
+
+  def fileshares
+    @fileshares ||= begin
+      hosts.collect { |host| host["RegisteredStorageFileShares"] }.flatten
+    end
+  end
+
+  def hosts
+    inventory["hosts"] || []
+  end
+
+  def clusters
+    inventory["clusters"] || []
+  end
+
+  def vms
+    inventory["vms"] || []
+  end
+
+  def images
+    inventory["images"] || []
+  end
+
   private
 
   def connection
