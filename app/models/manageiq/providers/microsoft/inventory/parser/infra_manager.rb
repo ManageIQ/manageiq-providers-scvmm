@@ -64,7 +64,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     collector.volumes.each do |volume|
       uid = volume["ID"]
 
-      persister.storages.build(
+      storage = persister.storages.build(
         :ems_ref                     => uid,
         :name                        => path_to_uri(volume["Name"], volume["VMHost"]),
         :store_type                  => volume["FileSystem"],
@@ -182,6 +182,23 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
   end
 
   def parse_host_storages(host, data)
+    data["DiskVolumes"].each do |volume|
+      persister_storage = persister.storages.find(volume["ID"])
+      next if persister_storage.nil?
+
+      persister.host_storages.build(
+        :host => host, :storage => persister_storage
+      )
+    end
+
+    data["RegisteredStorageFileShares"].each do |fileshare|
+      persister_storage = persister.storages.find(fileshare["ID"])
+      next if persister_storage.nil?
+
+      persister.host_storages.build(
+        :host => host, :storage => persister_storage
+      )
+    end
   end
 
   def parse_host_virtual_switches(host, virtual_switches)
@@ -247,12 +264,14 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
 
     collector.vms.each do |data|
       vm = persister.vms.build(
-        :name            => data["Name"],
-        :ems_ref         => data["ID"],
-        :uid_ems         => data["ID"],
-        :vendor          => "microsoft",
-        :raw_power_state => data["VirtualMachineStateString"],
-        :location        => data["VMCPath"].blank? ? "unknown" : data["VMCPath"].sub(drive_letter, "").strip,
+        :name             => data["Name"],
+        :ems_ref          => data["ID"],
+        :uid_ems          => data["ID"],
+        :vendor           => "microsoft",
+        :raw_power_state  => data["VirtualMachineStateString"],
+        :connection_state => lookup_connected_state(data['ServerConnection']['IsConnected'].to_s),
+        :location         => data["VMCPath"].blank? ? "unknown" : data["VMCPath"].sub(drive_letter, "").strip,
+        :tools_status     => process_tools_status(data),
       )
 
       parse_vm_operating_system(vm, data)

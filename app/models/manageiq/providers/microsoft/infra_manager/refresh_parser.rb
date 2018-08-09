@@ -538,18 +538,6 @@ module ManageIQ::Providers::Microsoft
       }
     end
 
-    def process_tools_status(property_hash)
-      tools = {
-        "OS shutdown"          => property_hash['OperatingSystemShutdownEnabled'],
-        "Time synchronization" => property_hash['TimeSynchronizationEnabled'],
-        "Data exchange"        => property_hash['DataExchangeEnabled'],
-        "Heartbeat"            => property_hash['HeartbeatEnabled'],
-        "Backup"               => property_hash['BackupEnabled'],
-      }
-
-      tools.collect { |kv| kv.join(": ") }.join(", ").truncate(255).chomp(", ")
-    end
-
     def set_relationship_on_hosts(cluster, nodes)
       nodes.each do |host|
         host = @data_index.fetch_path(:hosts, host['ID'])
