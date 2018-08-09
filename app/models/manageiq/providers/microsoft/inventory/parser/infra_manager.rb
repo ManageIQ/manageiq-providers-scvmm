@@ -247,6 +247,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
 
       parse_vm_operating_system(vm, data)
       parse_vm_hardware(vm, data)
+      parse_vm_networks(vm, data)
     end
   end
 
@@ -270,6 +271,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
 
     parse_vm_disks(hardware, data["VirtualHardDisks"])
     parse_vm_guest_devices(hardware, data)
+    parse_vm_networks(hardware, data)
   end
 
   def parse_vm_disks(hardware, virtual_hard_disks)
@@ -333,6 +335,24 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
           :controller_type => "IDE",
         )
       end
+    end
+  end
+
+  def parse_vm_networks(hardware, data)
+    hostname = process_computer_name(data["ComputerName"])
+
+    data["VirtualNetworkAdapters"].each do |vnic|
+      # TODO: this looks like it could container more than one IP but
+      # isn't an array, possibly comma separated?
+      ipv4addr = vnic["IPv4Addresses"]
+      ipv6addr = vnic["IPv6Addresses"]
+
+      persister.networks.build(
+        :hardware  => hardware,
+        :hostname  => hostname,
+        :ipaddress => ipv4addr,
+        :ipv6address => ipv6addr,
+      )
     end
   end
 

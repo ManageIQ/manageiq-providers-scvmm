@@ -438,18 +438,6 @@ module ManageIQ::Providers::Microsoft
       ]
     end
 
-    def process_computer_name(computername)
-      return if computername.nil?
-      log_header = "MIQ(#{self.class.name}.#{__method__})"
-
-      if computername.start_with?("getaddrinfo failed_")
-        $scvmm_log.warn("#{log_header} Invalid hostname value returned from SCVMM: #{computername}")
-        "Unavailable"
-      else
-        computername
-      end
-    end
-
     def process_disks(vm)
       return if vm['VirtualHardDisks'].blank?
 
