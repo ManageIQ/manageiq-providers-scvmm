@@ -3,6 +3,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     collector.collect!
 
     parse_ems
+    parse_datacenters
+    parse_folders
     parse_volumes
     parse_storage_fileshares
     parse_hosts
@@ -21,6 +23,39 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     manager.api_version = api_version
     manager.uid_ems     = guid
     manager.save!
+  end
+
+  def parse_datacenters
+    persister.ems_folders.build(
+      :type    => "Datacenter",
+      :name    => "SCVMM",
+      :uid_ems => "scvmm",
+      :ems_ref => "scvmm",
+      :hidden  => false,
+    )
+  end
+
+  def parse_folders
+    persister.ems_folders.build(
+      :name    => "Datacenters",
+      :ems_ref => "root_dc",
+      :uid_ems => "root_dc",
+      :hidden  => true,
+    )
+
+    persister.ems_folders.build(
+      :name    => "host",
+      :ems_ref => "host_folder",
+      :uid_ems => "host_folder",
+      :hidden  => true,
+    )
+
+    persister.ems_folders.build(
+      :name    => "vm",
+      :ems_ref => "vm_folder",
+      :uid_ems => "vm_folder",
+      :hidden  => true,
+    )
   end
 
   def parse_volumes
