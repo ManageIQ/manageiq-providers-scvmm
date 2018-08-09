@@ -258,6 +258,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       parse_vm_operating_system(vm, data)
       parse_vm_hardware(vm, data)
       parse_vm_networks(vm, data)
+      parse_vm_snapshots(vm, data)
     end
   end
 
@@ -362,6 +363,24 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :hostname  => hostname,
         :ipaddress => ipv4addr,
         :ipv6address => ipv6addr,
+      )
+    end
+  end
+
+  def parse_vm_snapshots(vm, data)
+    return if data["VMCheckpoints"].blank?
+
+    data["VMCheckpoints"].each do |checkpoint|
+      persister.snapshots.build(
+        :vm_or_template => vm,
+        :uid_ems        => checkpoint["CheckpointID"],
+        :uid            => checkpoint["CheckpointID"],
+        :ems_ref        => checkpoint["CheckpointID"],
+        :parent_uid     => checkpoint["ParentCheckpointID"],
+        :name           => checkpoint["Name"],
+        :description    => checkpoint["Description"].presence,
+        :create_time    => convert_windows_date_string_to_ruby_time(checkpoint["AddedTime"]),
+        :current        => checkpoint["CheckpointID"] == data["LastRestoredCheckpointID"],
       )
     end
   end

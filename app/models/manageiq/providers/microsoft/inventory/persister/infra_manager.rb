@@ -16,6 +16,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < Manag
     add_infra_collection(:miq_templates)
     add_infra_collection(:networks)
     add_infra_collection(:operating_systems)
+    add_infra_collection(:snapshots)
     add_infra_collection(:storages)
     add_infra_collection(:switches)
     add_infra_collection(:subnets)
