@@ -558,14 +558,6 @@ module ManageIQ::Providers::Microsoft
       }
     end
 
-    def process_vm_os_description(vm)
-      if vm['OperatingSystem']['Name'].casecmp('unknown').zero?
-        "Unknown"
-      else
-        vm['OperatingSystem']['Description']
-      end
-    end
-
     def process_tools_status(property_hash)
       tools = {
         "OS shutdown"          => property_hash['OperatingSystemShutdownEnabled'],

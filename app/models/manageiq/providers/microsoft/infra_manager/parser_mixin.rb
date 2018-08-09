@@ -77,4 +77,12 @@ module ManageIQ::Providers::Microsoft::InfraManager::ParserMixin
   def host_platform_unsupported?(host_hash)
     %w(vmwareesx).include?(host_hash["VirtualizationPlatformString"])
   end
+
+    def process_vm_os_description(vm)
+      if vm['OperatingSystem']['Name'].casecmp('unknown').zero?
+        "Unknown"
+      else
+        vm['OperatingSystem']['Description']
+      end
+    end
 end

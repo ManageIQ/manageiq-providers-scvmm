@@ -94,28 +94,46 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
   end
 
   def parse_hosts
-    collector.hosts.each do |host|
+    collector.hosts.each do |data|
       # Skip VMware ESX/ESXi hosts
-      next if host_platform_unsupported?(host)
+      next if host_platform_unsupported?(data)
 
-      uid = host["ID"]
-      host_name = host["Name"]
-
-      persister.hosts.build(
-        :name        => host_name,
-        :uid_ems     => uid,
-        :ems_ref     => uid,
-        :hostname    => host_name,
-        # TODO: :ems_cluster => persister.ems_clusters.lazy_find(),
-        # TODO: :ipaddress   => identify_primary_ip(host),
-        :vmm_vendor  => "microsoft",
-        :vmm_version => host["HyperVVersionString"],
-        :vmm_product => host["VirtualizationPlatformString"],
-        # TODO: :power_state      => lookup_power_state(host['HyperVStateString']),
-        # TODO: :maintenance      => lookup_overall_state(host['OverallState']),
-        # TODO: :connection_state => lookup_connected_state(host['CommunicationStateString']),
+      host = persister.hosts.build(
+        :name             => data["Name"],
+        :uid_ems          => data["ID"],
+        :ems_ref          => data["ID"],
+        :hostname         => data["Name"],
+        #:ipaddress        => identify_primary_ip(data),
+        :vmm_vendor       => "microsoft",
+        :vmm_version      => data["HyperVVersionString"],
+        :vmm_product      => data["VirtualizationPlatformString"],
+        :power_state      => lookup_power_state(data['HyperVStateString']),
+        :maintenance      => lookup_overall_state(data['OverallState']),
+        :connection_state => lookup_connected_state(data['CommunicationStateString']),
       )
+
+      parse_host_hardware(host, data)
     end
+  end
+
+  def parse_host_hardware(host, data)
+    cpu_family       = data['ProcessorFamily']
+    cpu_manufacturer = data['ProcessorManufacturer']
+    cpu_model        = data['ProcessorModel']
+    serial_number    = data['SMBiosGUIDString'].blank? ? nil : data['SMBiosGUIDString']
+
+    hardware = persister.host_hardwares.build(
+      :host                 => host,
+      :cpu_type             => "#{cpu_manufacturer} #{cpu_model} #{cpu_family}",
+      :manufacturer         => cpu_manufacturer,
+      :model                => cpu_model,
+      :cpu_speed            => data['ProcessorSpeed'],
+      :memory_mb            => data['TotalMemory'] / 1.megabyte,
+      :cpu_sockets          => data['PhysicalCPUCount'],
+      :cpu_total_cores      => data['LogicalProcessorCount'],
+      :cpu_cores_per_socket => data['CoresPerCPU'],
+      :serial_number        => serial_number,
+    )
   end
 
   def parse_clusters
@@ -136,29 +154,94 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
   def parse_vms
     drive_letter = /\A[a-z][:]/i
 
-    collector.vms.each do |vm|
-      persister.vms.build(
-        :name            => vm["Name"],
-        :ems_ref         => vm["ID"],
-        :uid_ems         => vm["ID"],
+    collector.vms.each do |data|
+      vm = persister.vms.build(
+        :name            => data["Name"],
+        :ems_ref         => data["ID"],
+        :uid_ems         => data["ID"],
         :vendor          => "microsoft",
-        :raw_power_state => vm["VirtualMachineStateString"],
-        :location        => vm["VMCPath"].blank? ? "unknown" : vm["VMCPath"].sub(drive_letter, "").strip,
+        :raw_power_state => data["VirtualMachineStateString"],
+        :location        => data["VMCPath"].blank? ? "unknown" : data["VMCPath"].sub(drive_letter, "").strip,
+      )
+
+      parse_vm_operating_system(vm, data)
+      parse_vm_hardware(vm, data)
+    end
+  end
+
+  def parse_vm_operating_system(vm, data)
+    persister.operating_systems.build(
+      :vm_or_template => vm,
+      :product_name   => data.fetch_path("OperatingSystem", "Name"),
+    )
+  end
+
+  def parse_vm_hardware(vm, data)
+    hardware = persister.hardwares.build(
+      :vm_or_template     => vm,
+      :cpu_total_cores    => data['CPUCount'],
+      :guest_os           => data['OperatingSystem']['Name'],
+      :guest_os_full_name => process_vm_os_description(data),
+      :memory_mb          => data['Memory'],
+      :cpu_type           => data['CPUType']['Name'],
+      :bios               => data['BiosGuid']
+    )
+
+    parse_vm_disks(hardware, data["VirtualHardDisks"])
+  end
+
+  def parse_vm_disks(hardware, virtual_hard_disks)
+    virtual_hard_disks&.each do |data|
+      persister.disks.build(
+        :hardware        => hardware,
+        :device_name     => data["Name"],
+        :size            => data["MaximumSize"],
+        :size_on_disk    => data["Size"],
+        :disk_type       => lookup_disk_type(data),
+        :device_type     => "disk",
+        :present         => true,
+        :filename        => data["SharePath"],
+        :location        => data["Location"],
+        :mode            => "persistent",
+        :controller_type => "IDE",
       )
     end
   end
 
   def parse_images
-    collector.images.each do |image|
-      persister.miq_templates.build(
-        :uid_ems         => image["ID"],
-        :ems_ref         => image["ID"],
-        :name            => image["Name"],
+    collector.images.each do |data|
+      template = persister.miq_templates.build(
+        :uid_ems         => data["ID"],
+        :ems_ref         => data["ID"],
+        :name            => data["Name"],
         :vendor          => "microsoft",
         :raw_power_state => "never",
         :template        => true,
         :location        => "unknown",
       )
+
+      parse_image_operating_system(template, data)
+      parse_image_hardware(template, data)
     end
+  end
+
+  def parse_image_operating_system(template, data)
+    persister.operating_systems.build(
+      :vm_or_template => template,
+      :product_name   => data["OperatingSystemString"],
+    )
+  end
+
+  def parse_image_hardware(template, data)
+    hardware = persister.hardwares.build(
+      :vm_or_template     => template,
+      :cpu_total_cores    => data['CPUCount'],
+      :memory_mb          => data['Memory'],
+      :cpu_type           => data['CPUTypeString'],
+      :guest_os           => data['OperatingSystemString'],
+      :guest_os_full_name => data['OperatingSystemString'],
+    )
+
+    parse_vm_disks(hardware, data["VirtualHardDisks"])
   end
 end
