@@ -112,10 +112,20 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :connection_state => lookup_connected_state(data['CommunicationStateString']),
       )
 
+      parse_host_operating_system(host, data)
       parse_host_hardware(host, data)
       parse_host_storages(host, data)
       parse_host_virtual_switches(host, data["VirtualSwitch"])
     end
+  end
+
+  def parse_host_operating_system(host, data)
+    persister.host_operating_systems.build(
+      :host         => host,
+      :version      => data["OperatingSystemVersionString"],
+      :product_name => data["OperatingSystem"]["Name"],
+      :product_type => "microsoft",
+    )
   end
 
   def parse_host_hardware(host, data)
