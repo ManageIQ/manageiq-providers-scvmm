@@ -236,14 +236,6 @@ module ManageIQ::Providers::Microsoft
       end
     end
 
-    def process_cidr(string)
-      if string && string.include?('.')
-        string[/(.*?\/\d+)/, 1]
-      else
-        nil
-      end
-    end
-
     def set_switch_on_pnic(pnic, switch)
       pnic_obj = @data_index.fetch_path(:physical_nic, pnic['ID'])
       pnic_obj[:switch] = switch

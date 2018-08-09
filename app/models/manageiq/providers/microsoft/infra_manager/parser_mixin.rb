@@ -78,11 +78,19 @@ module ManageIQ::Providers::Microsoft::InfraManager::ParserMixin
     %w(vmwareesx).include?(host_hash["VirtualizationPlatformString"])
   end
 
-    def process_vm_os_description(vm)
-      if vm['OperatingSystem']['Name'].casecmp('unknown').zero?
-        "Unknown"
-      else
-        vm['OperatingSystem']['Description']
-      end
+  def process_vm_os_description(vm)
+    if vm['OperatingSystem']['Name'].casecmp('unknown').zero?
+      "Unknown"
+    else
+      vm['OperatingSystem']['Description']
     end
+  end
+
+  def process_cidr(string)
+    if string && string.include?('.')
+      string[/(.*?\/\d+)/, 1]
+    else
+      nil
+    end
+  end
 end

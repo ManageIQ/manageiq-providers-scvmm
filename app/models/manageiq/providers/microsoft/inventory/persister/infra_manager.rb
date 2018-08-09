@@ -8,9 +8,14 @@ class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < Manag
     add_infra_collection(:hosts)
     add_infra_collection(:host_guest_devices)
     add_infra_collection(:host_hardwares)
+    add_infra_collection(:host_storages)
+    add_infra_collection(:host_switches)
+    add_infra_collection(:lans)
     add_infra_collection(:miq_templates)
     add_infra_collection(:operating_systems)
     add_infra_collection(:storages)
+    add_infra_collection(:switches)
+    add_infra_collection(:subnets)
     add_infra_collection(:vms)
   end
 

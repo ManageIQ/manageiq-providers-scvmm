@@ -113,6 +113,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       )
 
       parse_host_hardware(host, data)
+      parse_host_storages(host, data)
+      parse_host_virtual_switches(host, data["VirtualSwitch"])
     end
   end
 
@@ -120,7 +122,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     cpu_family       = data['ProcessorFamily']
     cpu_manufacturer = data['ProcessorManufacturer']
     cpu_model        = data['ProcessorModel']
-    serial_number    = data['SMBiosGUIDString'].blank? ? nil : data['SMBiosGUIDString']
+    serial_number    = data['SMBiosGUIDString'].presence
 
     hardware = persister.host_hardwares.build(
       :host                 => host,
@@ -166,6 +168,52 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :mode            => "persistent",
         :filename        => dvd,
       )
+    end
+  end
+
+  def parse_host_storages(host, data)
+  end
+
+  def parse_host_virtual_switches(host, virtual_switches)
+    switches = virtual_switches.map do |data|
+      switch = persister.switches.build(
+        :uid_ems => data["ID"],
+        :name    => data["Name"],
+      )
+
+      parse_logical_networks(switch, data["LogicalNetworks"])
+
+      switch
+    end
+
+    switches.each { |switch| persister.host_switches.build(:switch => switch, :host => host) }
+  end
+
+  def parse_logical_networks(switch, logical_networks)
+    logical_networks.each do |net|
+      lan = persister.lans.build(
+        :switch  => switch,
+        :name    => net["Name"],
+        :uid_ems => net["ID"],
+      )
+
+      net["VMNetworks"].to_a.each do |vm_network|
+        vm_net = persister.lans.build(
+          :switch  => switch,
+          :name    => vm_network["Name"],
+          :uid_ems => vm_network["ID"],
+          :parent  => lan,
+        )
+
+        vm_network["VMSubnet"].to_a.each do |subnet|
+          persister.subnets.build(
+            :lan     => vm_net,
+            :name    => subnet["Name"],
+            :ems_ref => subnet["ID"],
+            :cidr    => process_cidr(subnet["SubnetVLans"]),
+          )
+        end
+      end
     end
   end
 
