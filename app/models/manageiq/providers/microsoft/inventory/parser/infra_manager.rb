@@ -103,7 +103,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :uid_ems          => data["ID"],
         :ems_ref          => data["ID"],
         :hostname         => data["Name"],
-        #:ipaddress        => identify_primary_ip(data),
+        :ipaddress        => identify_primary_ip(data),
         :vmm_vendor       => "microsoft",
         :vmm_version      => data["HyperVVersionString"],
         :vmm_product      => data["VirtualizationPlatformString"],
@@ -134,6 +134,39 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       :cpu_cores_per_socket => data['CoresPerCPU'],
       :serial_number        => serial_number,
     )
+
+    parse_host_guest_devices(hardware, data)
+  end
+
+  def parse_host_guest_devices(hardware, data)
+    switches = data["VirtualSwitch"]
+    adapters = switches.collect { |s| s["VMHostNetworkAdapters"] }.flatten
+
+    adapters.each do |adapter|
+      persister.host_guest_devices.build(
+        :hardware        => hardware,
+        :uid_ems         => adapter["ID"],
+        :device_name     => adapter["ConnectionName"],
+        :device_type     => "ethernet",
+        :model           => adapter["Name"],
+        :location        => adapter["BDFLocationInformation"],
+        :present         => true,
+        :start_connected => true,
+        :controller_type => "ethernet",
+        :address         => adapter["MacAddress"],
+      )
+    end
+
+    data["DVDDriveList"].each do |dvd|
+      persister.host_guest_devices.build(
+        :hardware        => hardware,
+        :device_type     => "cdrom",
+        :present         => true,
+        :controller_type => "IDE",
+        :mode            => "persistent",
+        :filename        => dvd,
+      )
+    end
   end
 
   def parse_clusters
@@ -188,6 +221,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     )
 
     parse_vm_disks(hardware, data["VirtualHardDisks"])
+    parse_vm_guest_devices(hardware, data)
   end
 
   def parse_vm_disks(hardware, virtual_hard_disks)
@@ -205,6 +239,52 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :mode            => "persistent",
         :controller_type => "IDE",
       )
+    end
+  end
+
+  def parse_vm_guest_devices(hardware, data)
+    data["VirtualNetworkAdapters"].to_a.each do |vnic|
+      persister.guest_devices.build(
+        :hardware        => hardware,
+        :uid_ems         => vnic["ID"],
+        :present         => vnic["Enabled"],
+        :start_connected => vnic["Enabled"],
+        :address         => vnic["MACAddress"],
+        :device_name     => vnic["Name"],
+        :device_type     => "ethernet",
+        :controller_type => "ethernet",
+      )
+    end
+
+    data["VirtualDVDDrives"].to_a.each do |dvd|
+      next if dvd["HostDrive"].blank?
+
+      persister.guest_devices.build(
+        :hardware        => hardware,
+        :uid_ems         => dvd["ID"],
+        :present         => true,
+        :mode            => "persistent",
+        :controller_type => "IDE",
+        :device_type     => "cdrom",
+        :device_name     => dvd["Name"],
+        :filename        => dvd["HostDrive"],
+      )
+    end
+
+    if data["DVDISO"].present?
+      data["DVDISO"].each do |iso|
+        persister.guest_devices.build(
+          :hardware        => hardware,
+          :uid_ems         => iso["ID"],
+          :size            => iso["Size"] / 1.megabyte,
+          :present         => true,
+          :mode            => "persistent",
+          :device_type     => "cdrom",
+          :device_name     => iso["Name"],
+          :filename        => iso["SharePath"],
+          :controller_type => "IDE",
+        )
+      end
     end
   end
 
@@ -243,5 +323,6 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     )
 
     parse_vm_disks(hardware, data["VirtualHardDisks"])
+    parse_vm_guest_devices(hardware, data)
   end
 end

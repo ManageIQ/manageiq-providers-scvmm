@@ -32,7 +32,23 @@ class ManageIQ::Providers::Microsoft::Inventory::Collector::InfraManager < Manag
   end
 
   def hosts
-    inventory["hosts"] || []
+    @hosts ||= begin
+      inventory["hosts"] ||= []
+
+      switches_by_host_name = vnets.group_by { |switch| switch["VMHostName"] }
+      vm_networks_by_logical_network_id = vmnetworks.group_by { |net| net["LogicalNetwork"]["ID"] }
+
+      inventory["hosts"].each do |host|
+        host["VirtualSwitch"] = switches_by_host_name[host["Name"]] || []
+        host["VirtualSwitch"].each do |switch|
+          switch["LogicalNetworks"].to_a.each do |net|
+            net["VMNetworks"] = vm_networks_by_logical_network_id[net["ID"]] || []
+          end
+        end
+      end
+
+      inventory["hosts"]
+    end
   end
 
   def clusters
@@ -45,6 +61,14 @@ class ManageIQ::Providers::Microsoft::Inventory::Collector::InfraManager < Manag
 
   def images
     inventory["images"] || []
+  end
+
+  def vnets
+    inventory["vnets"] || []
+  end
+
+  def vmnetworks
+    inventory["vmnetworks"] || []
   end
 
   private
