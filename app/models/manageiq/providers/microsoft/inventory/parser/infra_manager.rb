@@ -1,4 +1,6 @@
 class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ::Providers::Microsoft::Inventory::Parser
+  include ManageIQ::Providers::Microsoft::InfraManager::ParserMixin
+
   def parse
     collector.collect!
 
@@ -158,15 +160,5 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :location        => "unknown",
       )
     end
-  end
-
-  def path_to_uri(file, hostname = nil)
-    file = Addressable::URI.encode(file.tr('\\', '/'))
-    hostname = URI::Generic.build(:host => hostname).host if hostname # ensure IPv6 hostnames
-    "file://#{hostname}/#{file}"
-  end
-
-  def host_platform_unsupported?(host_hash)
-    %w(vmwareesx).include?(host_hash["VirtualizationPlatformString"])
   end
 end
