@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
-## Gaprindashvili-3
+## Gaprindashvili-5
+
+### Fixed
+- Fix to use hostname when connect to SCVMM host [(#79)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/79)
+
+## Gaprindashvili-3 - Released 2018-05-15
 
 ### Fixed
 - Handle nil ems inventory from insufficient privileges credential issues [(#65)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/65)
