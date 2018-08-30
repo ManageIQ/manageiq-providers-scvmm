@@ -89,8 +89,6 @@ module ManageIQ::Providers::Microsoft::InfraManager::ParserMixin
   def process_cidr(string)
     if string && string.include?('.')
       string[/(.*?\/\d+)/, 1]
-    else
-      nil
     end
   end
 

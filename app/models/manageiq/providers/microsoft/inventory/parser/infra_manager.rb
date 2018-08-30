@@ -64,7 +64,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     collector.volumes.each do |volume|
       uid = volume["ID"]
 
-      storage = persister.storages.build(
+      persister.storages.build(
         :ems_ref                     => uid,
         :name                        => path_to_uri(volume["Name"], volume["VMHost"]),
         :store_type                  => volume["FileSystem"],
@@ -378,9 +378,9 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       ipv6addr = vnic["IPv6Addresses"]
 
       persister.networks.build(
-        :hardware  => hardware,
-        :hostname  => hostname,
-        :ipaddress => ipv4addr,
+        :hardware    => hardware,
+        :hostname    => hostname,
+        :ipaddress   => ipv4addr,
         :ipv6address => ipv6addr,
       )
     end
