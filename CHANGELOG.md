@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
+## Unreleased as of Sprint 94 - 2018-09-10
+
+### Added
+- Graph refresh for SCVMM [(#81)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/81)
+
+## Gaprindashvili-5 - Released 2018-09-07
+
+### Fixed
+- Fix to use hostname when connect to SCVMM host [(#79)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/79)
+
 ## Unreleased as of Sprint 93 - 2018-08-27
 
 ### Added
@@ -14,7 +24,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 ### Fixed
 - Add parent_id to the ActiveRecord select filter [(#80)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/80)
-- Fix to use hostname when connect to SCVMM host [(#79)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/79)
 
 ## Unreleased as of Sprint 84 - 2018-04-23
 
