@@ -1,4 +1,4 @@
-class ManageIQ::Providers::Microsoft::Inventory::Parser < ManagerRefresh::Inventory::Parser
+class ManageIQ::Providers::Microsoft::Inventory::Parser < ManageIQ::Providers::Inventory::Parser
   private
 
   def log_header
