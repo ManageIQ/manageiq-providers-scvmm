@@ -5,11 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
-## Hammer Beta-1
+## Hammer Beta-1 - Released 2018-10-12
 
 ### Added
 - Graph refresh for SCVMM [(#81)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/81)
 - Add plugin display name [(#83)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/83)
+- Update i18n catalog for hammer [(#90)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/90)
 
 ### Fixed
 - Add parent_id to the ActiveRecord select filter [(#80)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/80)
