@@ -433,7 +433,7 @@ module ManageIQ::Providers::Microsoft
       [
         {
           :hostname  => process_computer_name(vm['ComputerName']),
-          :ipaddress => vm['VirtualNetworkAdapters'].map{ |nic| nic['IPv4Addresses'] }.first
+          :ipaddress => Array(vm['VirtualNetworkAdapters']).map{ |nic| nic['IPv4Addresses'] }.first
         }
       ]
     end
