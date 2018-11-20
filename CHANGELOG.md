@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
+## Unreleased as of Sprint 99 - 2018-11-19
+
+### Fixed
+- Handle possibility of no associated vnet [(#94)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/94)
+
 ## Unreleased as of Sprint 94 - 2018-09-10
 
 ### Added
