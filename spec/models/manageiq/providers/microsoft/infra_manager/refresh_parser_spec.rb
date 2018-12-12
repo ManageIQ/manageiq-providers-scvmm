@@ -1,5 +1,5 @@
 describe ManageIQ::Providers::Microsoft::InfraManager::RefreshParser do
-  let(:ems)            { FactoryGirl.create(:ems_microsoft).tap { |ems| allow(ems).to receive(:connect) } }
+  let(:ems)            { FactoryBot.create(:ems_microsoft).tap { |ems| allow(ems).to receive(:connect) } }
   let(:refresh_parser) { described_class.new(ems) }
 
   describe '#path_to_uri' do

@@ -1,6 +1,6 @@
 describe ManageIQ::Providers::Microsoft::InfraManager::Provision do
   let(:vm_prov) do
-    FactoryGirl.create(
+    FactoryBot.create(
       :miq_provision_microsoft,
       :userid       => @admin.userid,
       :miq_request  => @pr,
@@ -34,18 +34,18 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Provision do
   context "A new provision request," do
     before(:each) do
       @os = OperatingSystem.new(:product_name => 'Microsoft Windows')
-      @admin       = FactoryGirl.create(:user_admin)
+      @admin       = FactoryBot.create(:user_admin)
       @target_vm_name = 'clone test'
-      @ems         = FactoryGirl.create(:ems_microsoft_with_authentication)
-      @vm_template = FactoryGirl.create(
+      @ems         = FactoryBot.create(:ems_microsoft_with_authentication)
+      @vm_template = FactoryBot.create(
         :template_microsoft,
         :name                  => "template1",
         :ext_management_system => @ems,
         :operating_system      => @os,
         :cpu_limit             => -1,
         :cpu_reserve           => 0)
-      @vm          = FactoryGirl.create(:vm_microsoft, :name => "vm1",       :location => "abc/def.xml")
-      @pr          = FactoryGirl.create(:miq_provision_request, :requester => @admin, :src_vm_id => @vm_template.id)
+      @vm          = FactoryBot.create(:vm_microsoft, :name => "vm1",       :location => "abc/def.xml")
+      @pr          = FactoryBot.create(:miq_provision_request, :requester => @admin, :src_vm_id => @vm_template.id)
       @options = {
         :pass           => 1,
         :vm_name        => @target_vm_name,
@@ -70,7 +70,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Provision do
 
     context "#prepare_for_clone_task" do
       before do
-        @host = FactoryGirl.create(:host_microsoft, :ems_ref => "test_ref")
+        @host = FactoryBot.create(:host_microsoft, :ems_ref => "test_ref")
         allow(vm_prov).to receive(:dest_host).and_return(@host)
       end
 
@@ -84,7 +84,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Provision do
     context "#parse mount point" do
       before do
         ds_name = "file://server.local/C:/ClusterStorage/CLUSP04%20Prod%20Volume%203-1"
-        @datastore = FactoryGirl.create(:storage, :name => ds_name)
+        @datastore = FactoryBot.create(:storage, :name => ds_name)
         allow(vm_prov).to receive(:dest_datastore).and_return(@datastore)
       end
 
@@ -101,16 +101,16 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Provision do
 
     context "#network adapter available" do
       before do
-        @switch = FactoryGirl.create(:switch, :name => 'switch1')
+        @switch = FactoryBot.create(:switch, :name => 'switch1')
 
-        @logical_network = FactoryGirl.create(
+        @logical_network = FactoryBot.create(
           :lan,
           :name    => 'virtualnetwork1',
           :uid_ems => '53f38ddc-450e-4f43-abde-881ac44608e3',
           :switch  => @switch
         )
 
-        @vm_network = FactoryGirl.create(
+        @vm_network = FactoryBot.create(
           :lan,
           :name    => 'virtualnetwork1-vm-network',
           :uid_ems => '243f2689-f6ef-401e-b875-41ba4c351c60',
@@ -118,7 +118,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Provision do
           :switch  => @switch
         )
 
-        host = FactoryGirl.create(:host_microsoft, :ems_ref => "test_ref")
+        host = FactoryBot.create(:host_microsoft, :ems_ref => "test_ref")
         host.switches = [@switch]
 
         @options[:vlan] = [@logical_network.uid_ems, @logical_network.name]

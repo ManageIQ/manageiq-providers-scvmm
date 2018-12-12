@@ -1,14 +1,14 @@
 describe ManageIQ::Providers::Microsoft::InfraManager::Provision do
   context "::Placement" do
     before do
-      ems      = FactoryGirl.create(:ems_microsoft_with_authentication)
-      template = FactoryGirl.create(:template_microsoft, :ext_management_system => ems)
-      vm       = FactoryGirl.create(:vm_microsoft)
-      @host    = FactoryGirl.create(:host_microsoft, :ext_management_system => ems)
-      @storage = FactoryGirl.create(:storage)
+      ems      = FactoryBot.create(:ems_microsoft_with_authentication)
+      template = FactoryBot.create(:template_microsoft, :ext_management_system => ems)
+      vm       = FactoryBot.create(:vm_microsoft)
+      @host    = FactoryBot.create(:host_microsoft, :ext_management_system => ems)
+      @storage = FactoryBot.create(:storage)
       options  = {:src_vm_id => template.id}
 
-      @task = FactoryGirl.create(
+      @task = FactoryBot.create(
         :miq_provision_microsoft,
         :source      => template,
         :destination => vm,
