@@ -13,8 +13,8 @@ describe ManageIQ::Providers::Microsoft::InfraManager do
 
   context "#connect with ssl" do
     before do
-      @e = FactoryGirl.create(:ems_microsoft, :hostname => "host", :security_protocol => "ssl", :ipaddress => "127.0.0.1")
-      @e.authentications << FactoryGirl.create(:authentication, :userid => "user", :password => "pass")
+      @e = FactoryBot.create(:ems_microsoft, :hostname => "host", :security_protocol => "ssl", :ipaddress => "127.0.0.1")
+      @e.authentications << FactoryBot.create(:authentication, :userid => "user", :password => "pass")
     end
 
     it "defaults" do
@@ -42,8 +42,8 @@ describe ManageIQ::Providers::Microsoft::InfraManager do
 
   context "#connect with kerberos" do
     before do
-      @e = FactoryGirl.create(:ems_microsoft, :hostname => "host", :security_protocol => "kerberos", :realm => "pretendrealm", :ipaddress => "127.0.0.1")
-      @e.authentications << FactoryGirl.create(:authentication, :userid => "user", :password => "pass")
+      @e = FactoryBot.create(:ems_microsoft, :hostname => "host", :security_protocol => "kerberos", :realm => "pretendrealm", :ipaddress => "127.0.0.1")
+      @e.authentications << FactoryBot.create(:authentication, :userid => "user", :password => "pass")
     end
 
     it "defaults" do
@@ -109,7 +109,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager do
   end
 
   context 'catalog types' do
-    let(:ems) { FactoryGirl.create(:ems_microsoft) }
+    let(:ems) { FactoryBot.create(:ems_microsoft) }
 
     it "#supported_catalog_types" do
       expect(ems.supported_catalog_types).to eq(%w(microsoft))

@@ -1,9 +1,9 @@
 describe ManageIQ::Providers::Microsoft::InfraManager::ProvisionWorkflow do
   include Spec::Support::WorkflowHelper
 
-  let(:admin)    { FactoryGirl.create(:user_with_group) }
-  let(:ems)      { FactoryGirl.create(:ems_microsoft) }
-  let(:template) { FactoryGirl.create(:template_microsoft, :name => "template", :ext_management_system => ems) }
+  let(:admin)    { FactoryBot.create(:user_with_group) }
+  let(:ems)      { FactoryBot.create(:ems_microsoft) }
+  let(:template) { FactoryBot.create(:template_microsoft, :name => "template", :ext_management_system => ems) }
 
   before do
     allow_any_instance_of(described_class).to receive(:update_field_visibility)
@@ -17,10 +17,10 @@ describe ManageIQ::Providers::Microsoft::InfraManager::ProvisionWorkflow do
   end
 
   describe "#load_hosts_vlans" do
-    let(:host)        { FactoryGirl.create(:host_with_ref, :switches => [switch]) }
-    let(:switch)      { FactoryGirl.create(:switch) }
-    let!(:lan_parent) { FactoryGirl.create(:lan, :switch => switch) }
-    let!(:lan)        { FactoryGirl.create(:lan, :parent => lan_parent, :switch => switch) }
+    let(:host)        { FactoryBot.create(:host_with_ref, :switches => [switch]) }
+    let(:switch)      { FactoryBot.create(:switch) }
+    let!(:lan_parent) { FactoryBot.create(:lan, :switch => switch) }
+    let!(:lan)        { FactoryBot.create(:lan, :parent => lan_parent, :switch => switch) }
 
     it "includes parent lans" do
       stub_dialog
@@ -32,7 +32,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::ProvisionWorkflow do
   end
 
   describe "#make_request" do
-    let(:alt_user) { FactoryGirl.create(:user_with_group) }
+    let(:alt_user) { FactoryBot.create(:user_with_group) }
     it "creates and update a request" do
       EvmSpecHelper.local_miq_server
       stub_dialog(:get_pre_dialogs)
