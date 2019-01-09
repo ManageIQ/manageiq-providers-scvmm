@@ -5,12 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
-## Hammer RC-2
-
-### Fixed
-- Handle possibility of no associated vnet [(#94)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/94) 
-
-## Hammer Beta-1 - Released 2018-10-12
+## Hammer-1
 
 ### Added
 - Graph refresh for SCVMM [(#81)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/81)
@@ -23,6 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 - Check connection to VMM when verifying credentials [(#66)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/66)
 - Handle nil ems inventory from insufficient privileges credential issues [(#65)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/65)
 - Migrate model display names from locale/en.yml to plugin [(#60)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/60)
+- Handle possibility of no associated vnet [(#94)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/94)
 
 ## Gaprindashvili-5 - Released 2018-09-07
 
