@@ -157,6 +157,10 @@ module ManageIQ::Providers::Microsoft
         return
       end
 
+      hardware = process_host_hardware(host)
+      storages = process_host_storages(host)
+      switches = process_virtual_switches(host)
+
       new_result = {
         :name             => host_name,
         :type             => 'ManageIQ::Providers::Microsoft::InfraManager::Host',
@@ -171,9 +175,10 @@ module ManageIQ::Providers::Microsoft
         :maintenance      => lookup_overall_state(host['OverallState']),
         :connection_state => lookup_connected_state(host['CommunicationStateString']),
         :operating_system => process_os(host),
-        :hardware         => process_host_hardware(host),
-        :storages         => process_host_storages(host),
-        :switches         => process_virtual_switches(host)
+        :hardware         => hardware,
+        :storages         => storages,
+        :switches         => switches,
+        :host_switches    => switches,
       }
 
       @data_index.store_path(:hosts_by_host_name, host_name, new_result)
