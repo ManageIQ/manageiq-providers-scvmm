@@ -25,7 +25,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     require 'winrm'
 
     connect_params[:operation_timeout] ||= 1800
-    connect_params[:password] = MiqPassword.try_decrypt(connect_params[:password])
+    connect_params[:password] = ManageIQ::Password.try_decrypt(connect_params[:password])
 
     connect = WinRM::Connection.new(connect_params)
     return connect unless validate

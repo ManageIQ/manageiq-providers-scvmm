@@ -99,10 +99,10 @@ describe ManageIQ::Providers::Microsoft::InfraManager do
     end
 
     it "decrypts the password" do
-      password = MiqPassword.encrypt("password")
+      password = ManageIQ::Password.encrypt("password")
       params = { :endpoint => "http://host2:5985/wsman", :user => "user", :password => password }
 
-      expect(MiqPassword).to receive(:try_decrypt).with(password).and_return("password")
+      expect(ManageIQ::Password).to receive(:try_decrypt).with(password).and_return("password")
 
       described_class.raw_connect(params)
     end

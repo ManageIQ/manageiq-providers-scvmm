@@ -64,7 +64,7 @@ module ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared::Scannin
       ems_text = "#{ems_connect_type}(#{use_broker ? 'via broker' : 'directly'}):#{miq_vm_host[:address]}"
       log_text = "#{log_header}: Connection to [#{ems_text}]"
       $log.info "#{log_header}: Connecting to [#{ems_text}] for VM:[#{vm_name}]"
-      password = MiqPassword.decrypt(miq_vm_host[:password])
+      password = ManageIQ::Password.decrypt(miq_vm_host[:password])
       miq_vm_host[:username] = miq_vm_host[:domain] + "\\" + miq_vm_host[:username] unless miq_vm_host[:domain].nil?
 
       begin
