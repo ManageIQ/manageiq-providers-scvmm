@@ -203,7 +203,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
 
   def parse_host_virtual_switches(host, virtual_switches)
     switches = virtual_switches.map do |data|
-      switch = persister.switches.build(
+      switch = persister.host_virtual_switches.build(
+        :host    => host,
         :uid_ems => data["ID"],
         :name    => data["Name"],
       )

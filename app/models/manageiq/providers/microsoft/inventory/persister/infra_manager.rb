@@ -18,7 +18,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < Manag
     add_infra_collection(:operating_systems)
     add_infra_collection(:snapshots)
     add_infra_collection(:storages)
-    add_infra_collection(:switches)
+    add_infra_collection(:host_virtual_switches)
     add_infra_collection(:subnets)
     add_infra_collection(:vms)
   end
