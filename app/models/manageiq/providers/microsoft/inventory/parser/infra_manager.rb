@@ -421,6 +421,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :raw_power_state => "never",
         :template        => true,
         :location        => "unknown",
+        :parent          => persister.ems_folders.lazy_find(:uid_ems => "vm_folder"),
       )
 
       parse_image_operating_system(template, data)

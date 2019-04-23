@@ -13,7 +13,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < Manag
     add_collection(infra, :host_storages)
     add_collection(infra, :host_switches)
     add_collection(infra, :lans)
-    add_collection(infra, :miq_templates)
+    add_collection(infra, :miq_templates, :attributes_blacklist => %i(parent))
     add_collection(infra, :networks)
     add_collection(infra, :operating_systems)
     add_collection(infra, :snapshots)
@@ -45,7 +45,9 @@ class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < Manag
 
     add_collection(infra, :vm_folder_relats, extra_props, settings) do |builder|
       builder.add_properties(:custom_save_block => vm_folder_save_block)
-      builder.add_dependency_attributes(:vms => [collections[:vms]])
+      builder.add_dependency_attributes(
+        :vms => [collections[:vms]], :miq_templates => [collections[:miq_templates]]
+      )
     end
 
     add_collection(infra, :host_folder_relats, extra_props, settings) do |builder|
@@ -72,15 +74,14 @@ class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < Manag
 
   def vm_folder_save_block
     lambda do |ems, inventory_collection|
-      vm_inv_collection = inventory_collection.dependency_attributes[:vms]&.first
-      return if vm_inv_collection.nil?
-
-      vms_ids = vm_inv_collection.data.map { |obj| obj.id }
+      vms_ids = inventory_collection.dependency_attributes.each_value.flat_map do |collections|
+        collections.first.data.map(&:id)
+      end
 
       ActiveRecord::Base.transaction do
         vm_folder = ems.ems_folders.find_by(:uid_ems => "vm_folder")
         unless vm_folder.nil?
-          vms = vm_inv_collection.model_class.find(vms_ids)
+          vms = VmOrTemplate.find(vms_ids)
           vm_folder.add_children(vms)
         end
       end
