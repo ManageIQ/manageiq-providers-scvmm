@@ -38,8 +38,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < Manag
       :without_model_class => true
     }
 
-    add_collection(infra, :root_folder_relat, extra_props, settings) do |builder|
-      builder.add_properties(:custom_save_block => root_folder_save_block)
+    add_collection(infra, :folder_relats, extra_props, settings) do |builder|
+      builder.add_properties(:custom_save_block => folder_save_block)
       builder.add_dependency_attributes(:ems_folders => [collections[:ems_folders]])
     end
 
@@ -58,17 +58,24 @@ class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < Manag
     end
   end
 
-  def root_folder_save_block
+  def folder_save_block
     lambda do |ems, inventory_collection|
       folder_inv_collection = inventory_collection.dependency_attributes[:ems_folders]&.first
       return if folder_inv_collection.nil?
 
-      # All folders must have a parent except for the root folder
-      root_folder_obj = folder_inv_collection.data.detect { |obj| obj.data[:parent].nil? }
-      return if root_folder_obj.nil?
+      folder_inv_collection.data.each do |obj|
+        folder = obj.model_class.find(obj.id)
 
-      root_folder = folder_inv_collection.model_class.find(root_folder_obj.id)
-      root_folder.with_relationship_type(:ems_metadata) { root_folder.parent = ems }
+        parent_lazy_obj = obj.data.delete(:parent)
+        if parent_lazy_obj.present?
+          parent_obj = parent_lazy_obj.load
+          parent = parent_obj.model_class.find(parent_obj.id)
+        else
+          parent = ems
+        end
+
+        folder.with_relationship_type(:ems_metadata) { folder.parent = parent }
+      end
     end
   end
 
