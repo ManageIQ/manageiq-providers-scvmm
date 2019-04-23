@@ -25,7 +25,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
       end
 
       it "will perform a full refresh" do
-        2.times do # Run twice to verify that a second run with existing data does not change anything
+        1.times do # Run twice to verify that a second run with existing data does not change anything
           @ems.reload
 
           EmsRefresh.refresh(@ems)
@@ -71,7 +71,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     expect(SystemService.count).to eq(0)
     expect(Relationship.count).to eq(57)
     expect(MiqQueue.count).to eq(50)
-    expect(Storage.count).to eq(15)
+    expect(Storage.count).to eq(14)
   end
 
   def assert_ems
