@@ -5,7 +5,9 @@ class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < Manag
     add_collection(infra, :ems_folders, :attributes_blacklist => %i(parent))
     add_collection(infra, :guest_devices)
     add_collection(infra, :hardwares)
-    add_collection(infra, :hosts, :attributes_blacklist => %i(parent))
+    add_collection(infra, :hosts,
+                   :attributes_blacklist => %i(parent),
+                   :secondary_refs       => {:by_host_name => %i(name)})
     add_collection(infra, :host_guest_devices)
     add_collection(infra, :host_hardwares)
     add_collection(infra, :host_networks)
