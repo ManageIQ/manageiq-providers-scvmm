@@ -34,6 +34,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       :uid_ems => "scvmm",
       :ems_ref => "scvmm",
       :hidden  => false,
+      :parent  => persister.ems_folders.lazy_find(:uid_ems => "root_dc")
     )
   end
 
@@ -43,6 +44,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       :ems_ref => "root_dc",
       :uid_ems => "root_dc",
       :hidden  => true,
+      :parent  => nil,
     )
 
     persister.ems_folders.build(
@@ -50,6 +52,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       :ems_ref => "host_folder",
       :uid_ems => "host_folder",
       :hidden  => true,
+      :parent  => persister.ems_folders.lazy_find(:uid_ems => "scvmm"),
     )
 
     persister.ems_folders.build(
@@ -57,6 +60,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       :ems_ref => "vm_folder",
       :uid_ems => "vm_folder",
       :hidden  => true,
+      :parent  => persister.ems_folders.lazy_find(:uid_ems => "scvmm"),
     )
   end
 
@@ -256,6 +260,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :ems_ref => uid,
         :uid_ems => uid,
         :name    => name,
+        :parent  => persister.ems_folders.lazy_find(:uid_ems => "host_folder"),
       )
     end
   end
@@ -273,6 +278,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :connection_state => lookup_connected_state(data['ServerConnection']['IsConnected'].to_s),
         :location         => data["VMCPath"].blank? ? "unknown" : data["VMCPath"].sub(drive_letter, "").strip,
         :tools_status     => process_tools_status(data),
+        :parent           => persister.ems_folders.lazy_find(:uid_ems => "vm_folder"),
       )
 
       parse_vm_operating_system(vm, data)
