@@ -55,6 +55,7 @@ module ManageIQ::Providers::Microsoft
 
     def get_storage_fileshares
       fileshares = @inventory['hosts'].collect{ |host| host['RegisteredStorageFileShares'] }.flatten
+      fileshares.uniq! { |fs| fs["ID"] }
       process_collection(fileshares, :storages) { |fs| parse_storage_fileshare(fs) }
     end
 

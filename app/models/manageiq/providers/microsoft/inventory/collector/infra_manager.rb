@@ -35,10 +35,14 @@ class ManageIQ::Providers::Microsoft::Inventory::Collector::InfraManager < Manag
     @hosts ||= begin
       inventory["hosts"] ||= []
 
+      cluster_by_host_id = {}
+      clusters.each { |cluster| cluster["Nodes"].each { |node| cluster_by_host_id[node["ID"]] = cluster } }
+
       switches_by_host_name = vnets.group_by { |switch| switch["VMHostName"] }
       vm_networks_by_logical_network_id = vmnetworks.group_by { |net| net["LogicalNetwork"]["ID"] }
 
       inventory["hosts"].each do |host|
+        host["Cluster"] = cluster_by_host_id[host["ID"]]
         host["VirtualSwitch"] = switches_by_host_name[host["Name"]] || []
         host["VirtualSwitch"].each do |switch|
           switch["LogicalNetworks"].to_a.each do |net|

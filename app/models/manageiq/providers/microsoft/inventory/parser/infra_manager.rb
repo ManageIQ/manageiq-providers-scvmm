@@ -34,6 +34,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       :uid_ems => "scvmm",
       :ems_ref => "scvmm",
       :hidden  => false,
+      :parent  => persister.ems_folders.lazy_find(:uid_ems => "root_dc")
     )
   end
 
@@ -43,6 +44,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       :ems_ref => "root_dc",
       :uid_ems => "root_dc",
       :hidden  => true,
+      :parent  => nil,
     )
 
     persister.ems_folders.build(
@@ -50,6 +52,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       :ems_ref => "host_folder",
       :uid_ems => "host_folder",
       :hidden  => true,
+      :parent  => persister.ems_folders.lazy_find(:uid_ems => "scvmm"),
     )
 
     persister.ems_folders.build(
@@ -57,6 +60,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       :ems_ref => "vm_folder",
       :uid_ems => "vm_folder",
       :hidden  => true,
+      :parent  => persister.ems_folders.lazy_find(:uid_ems => "scvmm"),
     )
   end
 
@@ -69,6 +73,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :name                        => path_to_uri(volume["Name"], volume["VMHost"]),
         :store_type                  => volume["FileSystem"],
         :total_space                 => volume["Capacity"],
+        :free_space                  => volume["FreeSpace"],
         :multiplehostaccess          => true,
         :thin_provisioning_supported => true,
         :location                    => uid,
@@ -98,12 +103,16 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       # Skip VMware ESX/ESXi hosts
       next if host_platform_unsupported?(data)
 
+      cluster_id = data.dig("Cluster", "ID")
+      ems_cluster = persister.ems_clusters.lazy_find(:ems_ref => cluster_id) if cluster_id
+
       host = persister.hosts.build(
         :name             => data["Name"],
         :uid_ems          => data["ID"],
         :ems_ref          => data["ID"],
         :hostname         => data["Name"],
         :ipaddress        => identify_primary_ip(data),
+        :ems_cluster      => ems_cluster,
         :vmm_vendor       => "microsoft",
         :vmm_version      => data["HyperVVersionString"],
         :vmm_product      => data["VirtualizationPlatformString"],
@@ -203,7 +212,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
 
   def parse_host_virtual_switches(host, virtual_switches)
     switches = virtual_switches.map do |data|
-      switch = persister.switches.build(
+      switch = persister.host_virtual_switches.build(
+        :host    => host,
         :uid_ems => data["ID"],
         :name    => data["Name"],
       )
@@ -255,6 +265,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :ems_ref => uid,
         :uid_ems => uid,
         :name    => name,
+        :parent  => persister.ems_folders.lazy_find(:uid_ems => "host_folder"),
       )
     end
   end
@@ -263,6 +274,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     drive_letter = /\A[a-z][:]/i
 
     collector.vms.each do |data|
+      host = persister.hosts.lazy_find({:name => data["HostName"]}, :ref => :by_host_name)
+
       vm = persister.vms.build(
         :name             => data["Name"],
         :ems_ref          => data["ID"],
@@ -272,6 +285,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :connection_state => lookup_connected_state(data['ServerConnection']['IsConnected'].to_s),
         :location         => data["VMCPath"].blank? ? "unknown" : data["VMCPath"].sub(drive_letter, "").strip,
         :tools_status     => process_tools_status(data),
+        :host             => host,
+        :parent           => persister.ems_folders.lazy_find(:uid_ems => "vm_folder"),
       )
 
       parse_vm_operating_system(vm, data)
@@ -414,6 +429,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :raw_power_state => "never",
         :template        => true,
         :location        => "unknown",
+        :parent          => persister.ems_folders.lazy_find(:uid_ems => "vm_folder"),
       )
 
       parse_image_operating_system(template, data)

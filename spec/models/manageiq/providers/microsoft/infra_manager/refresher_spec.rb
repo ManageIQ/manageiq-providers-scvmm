@@ -15,24 +15,35 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     expect(described_class.ems_type).to eq(:scvmm)
   end
 
-  it "will perform a full refresh" do
-    2.times do # Run twice to verify that a second run with existing data does not change anything
-      @ems.reload
+  [
+    ["Inventory Object Refresh", {:inventory_object_refresh => true}],
+    ["Save Inventory Refresh",   {:inventory_object_refresh => false}],
+  ].each do |context_name, settings_stub|
+    context context_name do
+      before do
+        stub_settings_merge(:ems_refresh => {:scvmm => settings_stub})
+      end
 
-      EmsRefresh.refresh(@ems)
-      @ems.reload
+      it "will perform a full refresh" do
+        1.times do # Run twice to verify that a second run with existing data does not change anything
+          @ems.reload
 
-      assert_table_counts
-      assert_ems
-      assert_specific_cluster
-      assert_specific_host
-      assert_esx_host
-      assert_specific_vm_network
-      assert_specific_subnet
-      assert_specific_vm
-      assert_specific_guest_devices
-      assert_specific_snapshot
-      assert_specific_storage
+          EmsRefresh.refresh(@ems)
+          @ems.reload
+
+          assert_table_counts
+          assert_ems
+          assert_specific_cluster
+          assert_specific_host
+          assert_esx_host
+          assert_specific_vm_network
+          assert_specific_subnet
+          assert_specific_vm
+          assert_specific_guest_devices
+          assert_specific_snapshot
+          assert_specific_storage
+        end
+      end
     end
   end
 
@@ -60,7 +71,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     expect(SystemService.count).to eq(0)
     expect(Relationship.count).to eq(57)
     expect(MiqQueue.count).to eq(50)
-    expect(Storage.count).to eq(15)
+    expect(Storage.count).to eq(14)
   end
 
   def assert_ems
