@@ -102,12 +102,16 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       # Skip VMware ESX/ESXi hosts
       next if host_platform_unsupported?(data)
 
+      cluster_id = data.dig("Cluster", "ID")
+      ems_cluster = persister.ems_clusters.lazy_find(:ems_ref => cluster_id) if cluster_id
+
       host = persister.hosts.build(
         :name             => data["Name"],
         :uid_ems          => data["ID"],
         :ems_ref          => data["ID"],
         :hostname         => data["Name"],
         :ipaddress        => identify_primary_ip(data),
+        :ems_cluster      => ems_cluster,
         :vmm_vendor       => "microsoft",
         :vmm_version      => data["HyperVVersionString"],
         :vmm_product      => data["VirtualizationPlatformString"],
