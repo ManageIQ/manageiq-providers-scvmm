@@ -73,6 +73,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :name                        => path_to_uri(volume["Name"], volume["VMHost"]),
         :store_type                  => volume["FileSystem"],
         :total_space                 => volume["Capacity"],
+        :free_space                  => volume["FreeSpace"],
         :multiplehostaccess          => true,
         :thin_provisioning_supported => true,
         :location                    => uid,
