@@ -1,5 +1,7 @@
 
 describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
+  include Spec::Support::EmsRefreshHelper
+
   before(:each) do
     _guid, _server, zone = EvmSpecHelper.create_guid_miq_server_zone
     FactoryBot.create(:miq_region)
@@ -45,6 +47,18 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
         end
       end
     end
+  end
+
+  it "Classic same as graph refresh" do
+    stub_settings_merge(:ems_refresh => {:scvmm => {:inventory_object_refresh => true}})
+    EmsRefresh.refresh(@ems)
+    inventory_after_graph_refresh = serialize_inventory
+
+    stub_settings_merge(:ems_refresh => {:scvmm => {:inventory_object_refresh => false}})
+    EmsRefresh.refresh(@ems)
+    inventory_after_classic_refresh = serialize_inventory
+
+    assert_inventory_not_changed(inventory_after_classic_refresh, inventory_after_graph_refresh)
   end
 
   def assert_table_counts
