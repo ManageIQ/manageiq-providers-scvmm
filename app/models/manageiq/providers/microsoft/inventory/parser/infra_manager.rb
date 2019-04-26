@@ -160,22 +160,24 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
   end
 
   def parse_host_guest_devices(hardware, data)
-    switches = data["VirtualSwitch"]
-    adapters = switches.collect { |s| s["VMHostNetworkAdapters"] }.flatten
+    data["VirtualSwitch"].each do |virtual_switch|
+      switch = persister.host_virtual_switches.lazy_find(:host => hardware.host, :uid_ems => virtual_switch["ID"])
 
-    adapters.each do |adapter|
-      persister.host_guest_devices.build(
-        :hardware        => hardware,
-        :uid_ems         => adapter["ID"],
-        :device_name     => adapter["ConnectionName"],
-        :device_type     => "ethernet",
-        :model           => adapter["Name"],
-        :location        => adapter["BDFLocationInformation"],
-        :present         => true,
-        :start_connected => true,
-        :controller_type => "ethernet",
-        :address         => adapter["MacAddress"],
-      )
+      virtual_switch["VMHostNetworkAdapters"].each do |adapter|
+        persister.host_guest_devices.build(
+          :hardware        => hardware,
+          :uid_ems         => adapter["ID"],
+          :device_name     => adapter["ConnectionName"],
+          :device_type     => "ethernet",
+          :model           => adapter["Name"],
+          :location        => adapter["BDFLocationInformation"],
+          :present         => true,
+          :start_connected => true,
+          :controller_type => "ethernet",
+          :address         => adapter["MacAddress"],
+          :switch          => switch,
+        )
+      end
     end
 
     data["DVDDriveList"].each do |dvd|
