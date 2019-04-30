@@ -31,8 +31,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Collector::InfraManager < Manag
     end
   end
 
-  def hosts
-    @hosts ||= begin
+  def hosts_by_host_name
+    @hosts_by_host_name ||= begin
       inventory["hosts"] ||= []
 
       cluster_by_host_id = {}
@@ -52,7 +52,11 @@ class ManageIQ::Providers::Microsoft::Inventory::Collector::InfraManager < Manag
       end
 
       inventory["hosts"]
-    end
+    end.index_by { |host| host["Name"] }
+  end
+
+  def hosts
+    hosts_by_host_name.values
   end
 
   def clusters

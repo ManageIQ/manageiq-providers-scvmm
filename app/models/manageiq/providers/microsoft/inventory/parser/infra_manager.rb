@@ -160,22 +160,24 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
   end
 
   def parse_host_guest_devices(hardware, data)
-    switches = data["VirtualSwitch"]
-    adapters = switches.collect { |s| s["VMHostNetworkAdapters"] }.flatten
+    data["VirtualSwitch"].each do |virtual_switch|
+      switch = persister.host_virtual_switches.lazy_find(:host => hardware.host, :uid_ems => virtual_switch["ID"])
 
-    adapters.each do |adapter|
-      persister.host_guest_devices.build(
-        :hardware        => hardware,
-        :uid_ems         => adapter["ID"],
-        :device_name     => adapter["ConnectionName"],
-        :device_type     => "ethernet",
-        :model           => adapter["Name"],
-        :location        => adapter["BDFLocationInformation"],
-        :present         => true,
-        :start_connected => true,
-        :controller_type => "ethernet",
-        :address         => adapter["MacAddress"],
-      )
+      virtual_switch["VMHostNetworkAdapters"].each do |adapter|
+        persister.host_guest_devices.build(
+          :hardware        => hardware,
+          :uid_ems         => adapter["ID"],
+          :device_name     => adapter["ConnectionName"],
+          :device_type     => "ethernet",
+          :model           => adapter["Name"],
+          :location        => adapter["BDFLocationInformation"],
+          :present         => true,
+          :start_connected => true,
+          :controller_type => "ethernet",
+          :address         => adapter["MacAddress"],
+          :switch          => switch,
+        )
+      end
     end
 
     data["DVDDriveList"].each do |dvd|
@@ -274,7 +276,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     drive_letter = /\A[a-z][:]/i
 
     collector.vms.each do |data|
-      host = persister.hosts.lazy_find({:name => data["HostName"]}, :ref => :by_host_name)
+      host       = collector.hosts_by_host_name[data["HostName"]]
+      cluster_id = host&.dig("Cluster", "ID")
 
       vm = persister.vms.build(
         :name             => data["Name"],
@@ -285,7 +288,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :connection_state => lookup_connected_state(data['ServerConnection']['IsConnected'].to_s),
         :location         => data["VMCPath"].blank? ? "unknown" : data["VMCPath"].sub(drive_letter, "").strip,
         :tools_status     => process_tools_status(data),
-        :host             => host,
+        :host             => persister.hosts.lazy_find(host["ID"]),
+        :ems_cluster      => persister.ems_clusters.lazy_find(cluster_id),
         :parent           => persister.ems_folders.lazy_find(:uid_ems => "vm_folder"),
       )
 

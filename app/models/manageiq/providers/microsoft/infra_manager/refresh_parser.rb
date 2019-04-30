@@ -436,10 +436,13 @@ module ManageIQ::Providers::Microsoft
     end
 
     def process_hostname_and_ip(vm)
+      vnics = Array(vm['VirtualNetworkAdapters'])
+
       [
         {
-          :hostname  => process_computer_name(vm['ComputerName']),
-          :ipaddress => Array(vm['VirtualNetworkAdapters']).map{ |nic| nic['IPv4Addresses'] }.first
+          :hostname    => process_computer_name(vm['ComputerName']),
+          :ipaddress   => vnics.map { |nic| nic['IPv4Addresses'] }.first,
+          :ipv6address => vnics.map { |nic| nic['IPv6Addresses'] }.first,
         }
       ]
     end
