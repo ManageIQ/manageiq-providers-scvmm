@@ -276,7 +276,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     drive_letter = /\A[a-z][:]/i
 
     collector.vms.each do |data|
-      host = persister.hosts.lazy_find({:name => data["HostName"]}, :ref => :by_host_name)
+      host       = collector.hosts_by_host_name[data["HostName"]]
+      cluster_id = host&.dig("Cluster", "ID")
 
       vm = persister.vms.build(
         :name             => data["Name"],
@@ -287,7 +288,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :connection_state => lookup_connected_state(data['ServerConnection']['IsConnected'].to_s),
         :location         => data["VMCPath"].blank? ? "unknown" : data["VMCPath"].sub(drive_letter, "").strip,
         :tools_status     => process_tools_status(data),
-        :host             => host,
+        :host             => persister.hosts.lazy_find(host["ID"]),
+        :ems_cluster      => persister.ems_clusters.lazy_find(cluster_id),
         :parent           => persister.ems_folders.lazy_find(:uid_ems => "vm_folder"),
       )
 
