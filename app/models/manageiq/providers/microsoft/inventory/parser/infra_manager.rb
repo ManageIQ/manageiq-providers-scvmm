@@ -279,6 +279,9 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       host       = collector.hosts_by_host_name[data["HostName"]]
       cluster_id = host&.dig("Cluster", "ID")
 
+      mount_point = data["VMCPath"].match(drive_letter).to_s
+      storage_id  = collector.storage_id_by_host_name_and_mount_point.dig(data["HostName"], mount_point) if mount_point
+
       vm = persister.vms.build(
         :name             => data["Name"],
         :ems_ref          => data["ID"],
@@ -290,6 +293,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :tools_status     => process_tools_status(data),
         :host             => persister.hosts.lazy_find(host["ID"]),
         :ems_cluster      => persister.ems_clusters.lazy_find(cluster_id),
+        :storage          => persister.storages.lazy_find(storage_id),
         :parent           => persister.ems_folders.lazy_find(:uid_ems => "vm_folder"),
       )
 
@@ -415,6 +419,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :uid            => checkpoint["CheckpointID"],
         :ems_ref        => checkpoint["CheckpointID"],
         :parent_uid     => checkpoint["ParentCheckpointID"],
+        :parent         => persister.snapshots.lazy_find(:vm_or_template => vm, :uid => checkpoint["ParentCheckpointID"]),
         :name           => checkpoint["Name"],
         :description    => checkpoint["Description"].presence,
         :create_time    => convert_windows_date_string_to_ruby_time(checkpoint["AddedTime"]),

@@ -59,6 +59,23 @@ class ManageIQ::Providers::Microsoft::Inventory::Collector::InfraManager < Manag
     hosts_by_host_name.values
   end
 
+  def storage_id_by_host_name_and_mount_point
+    @storage_id_by_host_name_and_mount_point ||= begin
+      drive_letter = /\A[a-z][:]/i
+
+      hosts.each_with_object({}) do |host, hash|
+        hash[host["Name"]] ||= {}
+
+        host["DiskVolumes"].each do |disk_volume|
+          mount_point = disk_volume["Name"].match(drive_letter).to_s
+          next if mount_point.blank?
+
+          hash[host["Name"]][mount_point] = disk_volume["ID"]
+        end
+      end
+    end
+  end
+
   def clusters
     inventory["clusters"] || []
   end
