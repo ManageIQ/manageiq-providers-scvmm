@@ -106,6 +106,8 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       cluster_id = data.dig("Cluster", "ID")
       ems_cluster = persister.ems_clusters.lazy_find(:ems_ref => cluster_id) if cluster_id
 
+      parent_folder = persister.ems_folders.lazy_find(:uid_ems => "host_folder") if cluster_id.nil?
+
       host = persister.hosts.build(
         :name             => data["Name"],
         :uid_ems          => data["ID"],
@@ -119,6 +121,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :power_state      => lookup_power_state(data['HyperVStateString']),
         :maintenance      => lookup_overall_state(data['OverallState']),
         :connection_state => lookup_connected_state(data['CommunicationStateString']),
+        :parent           => parent_folder,
       )
 
       parse_host_operating_system(host, data)
