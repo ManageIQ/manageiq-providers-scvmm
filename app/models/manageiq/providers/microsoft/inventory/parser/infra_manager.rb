@@ -186,6 +186,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     data["DVDDriveList"].each do |dvd|
       persister.host_guest_devices.build(
         :hardware        => hardware,
+        :uid_ems         => dvd,
         :device_type     => "cdrom",
         :present         => true,
         :controller_type => "IDE",
