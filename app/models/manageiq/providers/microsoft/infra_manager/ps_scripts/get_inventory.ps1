@@ -7,7 +7,7 @@ $ems = Get-SCVMMServer -ComputerName localhost |
     @{name='Version';expression={$_.ServerInterfaceVersion -As [string]}}
 
 $vms = @(Get-SCVirtualMachine -VMMServer localhost -All |
-  Select -Property BackupEnabled,BiosGuid,ComputerName,CPUCount,CPUType,DataExchangeEnabled,
+  Select -Property BackupEnabled,BiosGuid,ComputerName,CPUCount,CPUType,CustomProperty,DataExchangeEnabled,
     HeartbeatEnabled,HostName,ID,LastRestoredCheckpointID,Memory,Name,OperatingSystem,
     OperatingSystemShutdownEnabled,ServerConnection,TimeSynchronizationEnabled,
     VirtualDVDDrives,VirtualHardDisks,VirtualNetworkAdapters,VMCheckpoints,VMCPath,

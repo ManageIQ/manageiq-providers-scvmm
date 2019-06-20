@@ -264,21 +264,22 @@ module ManageIQ::Providers::Microsoft
       connection_state = vm['ServerConnection']['IsConnected'].to_s
 
       new_result = {
-        :name             => vmname,
-        :ems_ref          => uid,
-        :uid_ems          => uid,
-        :type             => 'ManageIQ::Providers::Microsoft::InfraManager::Vm',
-        :vendor           => 'microsoft',
-        :raw_power_state  => vm['VirtualMachineStateString'],
-        :operating_system => {:product_name => vm['OperatingSystem']['Name']},
-        :connection_state => lookup_connected_state(connection_state),
-        :tools_status     => process_tools_status(vm),
-        :host             => host,
-        :ems_cluster      => host[:ems_cluster],
-        :hardware         => process_vm_hardware(vm),
-        :snapshots        => process_snapshots(vm),
-        :storage          => process_vm_storage(vm['VMCPath'], host),
-        :storages         => process_vm_storages(vm)
+        :name              => vmname,
+        :ems_ref           => uid,
+        :uid_ems           => uid,
+        :type              => 'ManageIQ::Providers::Microsoft::InfraManager::Vm',
+        :vendor            => 'microsoft',
+        :raw_power_state   => vm['VirtualMachineStateString'],
+        :operating_system  => {:product_name => vm['OperatingSystem']['Name']},
+        :connection_state  => lookup_connected_state(connection_state),
+        :tools_status      => process_tools_status(vm),
+        :host              => host,
+        :ems_cluster       => host[:ems_cluster],
+        :hardware          => process_vm_hardware(vm),
+        :custom_attributes => process_vm_custom_properties(vm),
+        :snapshots         => process_snapshots(vm),
+        :storage           => process_vm_storage(vm['VMCPath'], host),
+        :storages          => process_vm_storages(vm)
       }
 
       new_result[:location] = vm['VMCPath'].blank? ? 'unknown' : vm['VMCPath'].sub(DRIVE_LETTER, "").strip
@@ -411,6 +412,23 @@ module ManageIQ::Providers::Microsoft
         :guest_devices        => process_vm_guest_devices(vm),
         :bios                 => vm['BiosGuid']
       }
+    end
+
+    def process_vm_custom_properties(vm)
+      result = []
+
+      custom_properties = vm['CustomProperty']
+      custom_properties.each do |key, value|
+        new_result = {
+          :section => 'custom_field',
+          :name    => key,
+          :value   => value,
+          :source  => 'VC'
+        }
+        result << new_result
+      end
+
+      result
     end
 
     def process_snapshots(vm)
