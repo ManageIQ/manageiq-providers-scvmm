@@ -415,20 +415,14 @@ module ManageIQ::Providers::Microsoft
     end
 
     def process_vm_custom_properties(vm)
-      result = []
-
-      custom_properties = vm['CustomProperty']
-      custom_properties.each do |key, value|
-        new_result = {
+      vm['CustomProperty'].map do |key, value|
+        {
           :section => 'custom_field',
           :name    => key,
           :value   => value,
           :source  => 'VC'
         }
-        result << new_result
       end
-
-      result
     end
 
     def process_snapshots(vm)

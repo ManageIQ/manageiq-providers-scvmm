@@ -304,6 +304,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
 
       parse_vm_operating_system(vm, data)
       parse_vm_hardware(vm, data)
+      parse_vm_custom_properties(vm, data)
       parse_vm_networks(vm, data)
       parse_vm_snapshots(vm, data)
     end
@@ -330,6 +331,18 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     parse_vm_disks(hardware, data["VirtualHardDisks"])
     parse_vm_guest_devices(hardware, data)
     parse_vm_networks(hardware, data)
+  end
+
+  def parse_vm_custom_properties(vm, data)
+    data['CustomProperty'].map do |key, value|
+      {
+        :resource => vm,
+        :section  => 'custom_field',
+        :name     => key,
+        :value    => value,
+        :source   => 'VC'
+      }
+    end
   end
 
   def parse_vm_disks(hardware, virtual_hard_disks)
