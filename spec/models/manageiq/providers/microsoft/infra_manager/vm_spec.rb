@@ -32,7 +32,9 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Vm do
   end
 
   context "reset" do
-    let(:vm) { ManageIQ::Providers::Microsoft::InfraManager::Vm.new }
+    let(:ems)  { FactoryBot.create(:ems_microsoft) }
+    let(:host) { FactoryBot.create(:host_microsoft) }
+    let(:vm)   { FactoryBot.create(:vm_microsoft, :host => host, :ext_management_system => ems) }
     let(:powered_on) { "Running" }
     let(:powered_off) { "PowerOff" }
 
