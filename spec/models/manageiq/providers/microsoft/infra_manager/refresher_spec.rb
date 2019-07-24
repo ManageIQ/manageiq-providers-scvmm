@@ -41,6 +41,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
           assert_specific_vm_network
           assert_specific_subnet
           assert_specific_vm
+          assert_specific_template
           assert_specific_guest_devices
           assert_specific_snapshot
           assert_specific_storage
@@ -292,6 +293,17 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     )
 
     # TODO: Add "Stored" status value in DB. This is a VM that has been provisioned but not deployed
+  end
+
+  def assert_specific_template
+    template = @ems.miq_templates.find_by(:ems_ref => "3184d261-3226-490c-bb2f-010d547059f5")
+    expect(template).to have_attributes(
+      :name            => "miq-nightly-201709012000",
+      :uid_ems         => "3184d261-3226-490c-bb2f-010d547059f5",
+      :power_state     => "never",
+      :type            => "ManageIQ::Providers::Microsoft::InfraManager::Template",
+      :raw_power_state => "never"
+    )
   end
 
   def assert_specific_snapshot

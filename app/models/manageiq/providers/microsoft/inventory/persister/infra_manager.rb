@@ -14,7 +14,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < Manag
     add_collection(infra, :host_storages)
     add_collection(infra, :host_switches)
     add_collection(infra, :lans)
-    add_collection(infra, :miq_templates)
+    add_collection(infra, :miq_templates, :model_class => ManageIQ::Providers::Microsoft::InfraManager::Template)
     add_collection(infra, :networks)
     add_collection(infra, :operating_systems)
     add_collection(infra, :snapshots)
