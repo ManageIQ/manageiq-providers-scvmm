@@ -5,7 +5,10 @@ class ManageIQ::Providers::Microsoft::InfraManager::Vm < ManageIQ::Providers::In
   supports_not :publish
 
   supports :reset do
-    unsupported_reason_add(:reset, _('The VM is not powered on')) unless current_state == 'on'
+    unsupported_reason_add(:reset, unsupported_reason(:control)) unless supports_control?
+    unless current_state == 'on'
+      unsupported_reason_add(:reset, _('The VM is not powered on'))
+    end
   end
 
   POWER_STATES = {
