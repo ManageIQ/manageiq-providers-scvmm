@@ -17,51 +17,26 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     expect(described_class.ems_type).to eq(:scvmm)
   end
 
-  [
-    ["Inventory Object Refresh", {:inventory_object_refresh => true}],
-    ["Save Inventory Refresh",   {:inventory_object_refresh => false}],
-  ].each do |context_name, settings_stub|
-    context context_name do
-      before do
-        stub_settings_merge(:ems_refresh => {:scvmm => settings_stub})
-      end
+  it "will perform a full refresh" do
+    1.times do # Run twice to verify that a second run with existing data does not change anything
+      @ems.reload
 
-      it "will perform a full refresh" do
-        1.times do # Run twice to verify that a second run with existing data does not change anything
-          @ems.reload
+      EmsRefresh.refresh(@ems)
+      @ems.reload
 
-          EmsRefresh.refresh(@ems)
-          @ems.reload
-
-          assert_table_counts
-          assert_ems
-          assert_specific_cluster
-          assert_specific_host
-          assert_esx_host
-          assert_specific_vm_network
-          assert_specific_subnet
-          assert_specific_vm
-          assert_specific_template
-          assert_specific_guest_devices
-          assert_specific_snapshot
-          assert_specific_storage
-        end
-      end
+      assert_table_counts
+      assert_ems
+      assert_specific_cluster
+      assert_specific_host
+      assert_esx_host
+      assert_specific_vm_network
+      assert_specific_subnet
+      assert_specific_vm
+      assert_specific_template
+      assert_specific_guest_devices
+      assert_specific_snapshot
+      assert_specific_storage
     end
-  end
-
-  it "Classic same as graph refresh" do
-    stub_settings_merge(:ems_refresh => {:scvmm => {:inventory_object_refresh => true}})
-    EmsRefresh.refresh(@ems)
-    MiqQueue.destroy_all
-    inventory_after_graph_refresh = serialize_inventory
-
-    stub_settings_merge(:ems_refresh => {:scvmm => {:inventory_object_refresh => false}})
-    EmsRefresh.refresh(@ems)
-    MiqQueue.destroy_all
-    inventory_after_classic_refresh = serialize_inventory
-
-    assert_inventory_not_changed(inventory_after_classic_refresh, inventory_after_graph_refresh)
   end
 
   def assert_table_counts

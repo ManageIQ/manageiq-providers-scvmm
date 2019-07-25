@@ -3,7 +3,6 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
   require_nested :Provision
   require_nested :ProvisionWorkflow
   require_nested :Refresher
-  require_nested :RefreshParser
   require_nested :RefreshWorker
   require_nested :Subnet
   require_nested :Template
@@ -107,6 +106,11 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
 
   def supported_catalog_types
     %w(microsoft)
+  end
+
+
+  def inventory_object_refresh?
+    true
   end
 
   def vm_start(vm, _options = {})
