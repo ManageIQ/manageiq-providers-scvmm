@@ -7,6 +7,7 @@
 /doc/
 /pkg/
 /spec/reports/
+/spec/tools/scvmm_data/powershell.log*
 /tmp/
 
 /config/settings.local.yml
