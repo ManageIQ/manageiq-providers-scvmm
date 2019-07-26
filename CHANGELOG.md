@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
-## Unreleased as of Sprint 105 - 2019-02-18
+## Ivanchuk Beta1
 
 ### Fixed
 - Parse host.host_switches [(#104)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/104)
