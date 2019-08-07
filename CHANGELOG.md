@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
-## Ivanchuk Beta1
+## Ivanchuk-Beta2
+
+### Fixed
+- VM does not support power opperations if archived [(#126)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/126)
+- Fix the SCVMM template type, was just MiqTemplate [(#127)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/127)
+
+## Ivanchuk-Beta1 - Released 2019-07-29
 
 ### Fixed
 - Parse host.host_switches [(#104)](https://github.com/ManageIQ/manageiq-providers-scvmm/pull/104)
