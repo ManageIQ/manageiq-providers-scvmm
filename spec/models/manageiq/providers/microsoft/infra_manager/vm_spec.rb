@@ -39,13 +39,13 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Vm do
     let(:powered_off) { "PowerOff" }
 
     it "is available when powered on" do
-      vm.update_attributes(:raw_power_state => powered_on)
+      vm.update(:raw_power_state => powered_on)
       expect(vm.current_state).to eql('on')
       expect(vm.supports_reset?).to be_truthy
     end
 
     it "is not available when powered off" do
-      vm.update_attributes(:raw_power_state => powered_off)
+      vm.update(:raw_power_state => powered_off)
       expect(vm.current_state).to eql('off')
       expect(vm.supports_reset?).to be_falsy
       expect(vm.unsupported_reason(:reset)).to eql('The VM is not powered on')
