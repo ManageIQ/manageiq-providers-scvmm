@@ -20,6 +20,61 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     @description ||= "Microsoft System Center VMM".freeze
   end
 
+  def self.params_for_create
+    @params_for_create ||= {
+      :title  => "Configure #{description}",
+      :fields => [
+        {
+          :component  => "text-field",
+          :name       => "endpoints.default.server",
+          :label      => "Server Hostname/IP Address",
+          :isRequired => true,
+          :validate   => [{:type => "required-validator"}]
+        },
+        {
+          :component  => "text-field",
+          :name       => "endpoints.default.username",
+          :label      => "Username",
+          :isRequired => true,
+          :validate   => [{:type => "required-validator"}]
+        },
+        {
+          :component  => "text-field",
+          :name       => "endpoints.default.password",
+          :label      => "Password",
+          :type       => "password",
+          :isRequired => true,
+          :validate   => [{:type => "required-validator"}]
+        },
+        {
+          :component => "text-field",
+          :name      => "endpoints.default.port",
+          :label     => "Port",
+          :type      => "numberic",
+        }
+      ]
+    }.freeze
+  end
+
+  # Verify Credentials
+  # args: {
+  #   "endpoints" => {
+  #     "default" => {
+  #       "server" => nil,
+  #       "username" => nil,
+  #       "password" => nil,
+  #       "port" => nil
+  #     }
+  #   }
+  # }
+  def self.verify_credentials(args)
+    default_endpoint = args.dig("endpoints", "default")
+    username, password, server, port = default_endpoint&.values_at("username", "password", "server", "port")
+
+    raw_connect(build_connect_params(:user => username, :password => password, :hostname => server, :port => port), true)
+    true
+  end
+
   def self.raw_connect(connect_params, validate = false)
     require 'winrm'
 
