@@ -105,7 +105,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
   end
 
   def assert_specific_cluster
-    @cluster = EmsCluster.find_by(:name => "hyperv_cluster")
+    @cluster = ManageIQ::Providers::Microsoft::InfraManager::Cluster.find_by(:name => "hyperv_cluster")
 
     expect(@cluster).to have_attributes(
       :ems_ref => "8e830204-6448-4817-b220-34af48ccf8ca",

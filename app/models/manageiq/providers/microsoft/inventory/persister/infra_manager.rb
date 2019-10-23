@@ -1,7 +1,7 @@
 class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < ManageIQ::Providers::Microsoft::Inventory::Persister
   def initialize_inventory_collections
     add_collection(infra, :disks)
-    add_collection(infra, :ems_clusters)
+    add_collection(infra, :clusters)
     add_collection(infra, :ems_folders)
     add_collection(infra, :resource_pools)
     add_collection(infra, :guest_devices)

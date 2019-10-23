@@ -1,4 +1,5 @@
 class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraManager
+  require_nested :Cluster
   require_nested :Host
   require_nested :Provision
   require_nested :ProvisionWorkflow
