@@ -104,7 +104,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       next if host_platform_unsupported?(data)
 
       cluster_id = data.dig("Cluster", "ID")
-      ems_cluster = persister.ems_clusters.lazy_find(:ems_ref => cluster_id) if cluster_id
+      cluster = persister.clusters.lazy_find(:ems_ref => cluster_id) if cluster_id
 
       parent_folder = persister.ems_folders.lazy_find(:uid_ems => "host_folder") if cluster_id.nil?
 
@@ -114,7 +114,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :ems_ref          => data["ID"],
         :hostname         => data["Name"],
         :ipaddress        => identify_primary_ip(data),
-        :ems_cluster      => ems_cluster,
+        :ems_cluster      => cluster,
         :vmm_vendor       => "microsoft",
         :vmm_version      => data["HyperVVersionString"],
         :vmm_product      => data["VirtualizationPlatformString"],
@@ -267,7 +267,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
 
       # TODO: link clusters to hosts
 
-      persister.ems_clusters.build(
+      persister.clusters.build(
         :ems_ref => uid,
         :uid_ems => uid,
         :name    => name,
@@ -297,7 +297,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
         :location         => data["VMCPath"].blank? ? "unknown" : data["VMCPath"].sub(drive_letter, "").strip,
         :tools_status     => process_tools_status(data),
         :host             => persister.hosts.lazy_find(host_id),
-        :ems_cluster      => persister.ems_clusters.lazy_find(cluster_id),
+        :ems_cluster      => persister.clusters.lazy_find(cluster_id),
         :storage          => persister.storages.lazy_find(storage_id),
         :parent           => persister.ems_folders.lazy_find(:uid_ems => "vm_folder"),
       )
