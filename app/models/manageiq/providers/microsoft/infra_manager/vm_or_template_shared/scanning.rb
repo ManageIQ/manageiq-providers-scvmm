@@ -10,6 +10,10 @@ module ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared::Scannin
     end
   end
 
+  def require_snapshot_for_scan?
+    false
+  end
+
   def perform_metadata_scan(ost)
     require 'MiqVm/miq_scvmm_vm'
 
