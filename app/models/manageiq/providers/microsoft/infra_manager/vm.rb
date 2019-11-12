@@ -1,5 +1,6 @@
 class ManageIQ::Providers::Microsoft::InfraManager::Vm < ManageIQ::Providers::InfraManager::Vm
   include_concern 'ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared'
+  include_concern 'Operations'
 
   supports_not :migrate, :reason => _("Migrate operation is not supported.")
   supports_not :publish
