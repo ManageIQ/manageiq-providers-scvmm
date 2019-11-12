@@ -13,8 +13,10 @@ module ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared::Scannin
   #
   # Adjustment Multiplier is 8 (i.e. 8 times the specified timeout)
   #
-  def self.scan_timeout_adjustment_multiplier
-    8
+  module ClassMethods
+    def scan_timeout_adjustment_multiplier
+      8
+    end
   end
 
   def require_snapshot_for_scan?
