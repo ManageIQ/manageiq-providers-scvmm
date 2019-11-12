@@ -1,4 +1,6 @@
 class ManageIQ::Providers::Microsoft::InfraManager::Template < ManageIQ::Providers::InfraManager::Template
+  include_concern 'ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared'
+
   supports :provisioning do
     if ext_management_system
       unsupported_reason_add(:provisioning, ext_management_system.unsupported_reason(:provisioning)) unless ext_management_system.supports_provisioning?
