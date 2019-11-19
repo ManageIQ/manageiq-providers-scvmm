@@ -29,7 +29,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
 
   def parse_datacenters
     persister.ems_folders.build(
-      :type    => "Datacenter",
+      :type    => "ManageIQ::Providers::Microsoft::InfraManager::Datacenter",
       :name    => "SCVMM",
       :uid_ems => "scvmm",
       :ems_ref => "scvmm",
@@ -40,6 +40,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
 
   def parse_folders
     persister.ems_folders.build(
+      :type    => "ManageIQ::Providers::Microsoft::InfraManager::Folder",
       :name    => "Datacenters",
       :ems_ref => "root_dc",
       :uid_ems => "root_dc",
@@ -48,6 +49,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     )
 
     persister.ems_folders.build(
+      :type    => "ManageIQ::Providers::Microsoft::InfraManager::Folder",
       :name    => "host",
       :ems_ref => "host_folder",
       :uid_ems => "host_folder",
@@ -56,6 +58,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
     )
 
     persister.ems_folders.build(
+      :type    => "ManageIQ::Providers::Microsoft::InfraManager::Folder",
       :name    => "vm",
       :ems_ref => "vm_folder",
       :uid_ems => "vm_folder",
