@@ -10,6 +10,10 @@ module ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared::Scannin
     end
   end
 
+  def scan_job_class
+    ManageIQ::Providers::Microsoft::InfraManager::Scanning::Job
+  end
+
   #
   # Adjustment Multiplier is 8 (i.e. 8 times the specified timeout)
   #
