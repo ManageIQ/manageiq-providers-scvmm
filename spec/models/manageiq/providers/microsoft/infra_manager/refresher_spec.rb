@@ -95,6 +95,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     expect(@storage).to have_attributes(
       :ems_ref                     => "8d585b11-3bb2-4be7-931c-b6cec81ec85d",
       :name                        => storage_name,
+      :type                        => "ManageIQ::Providers::Microsoft::InfraManager::Storage",
       :store_type                  => "CSVFS",
       :total_space                 => 805_333_626_880,
       :free_space                  => 704_289_169_408,

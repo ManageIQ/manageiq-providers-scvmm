@@ -6,6 +6,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
   require_nested :Refresher
   require_nested :RefreshWorker
   require_nested :ResourcePool
+  require_nested :Storage
   require_nested :Subnet
   require_nested :Template
   require_nested :Vm
