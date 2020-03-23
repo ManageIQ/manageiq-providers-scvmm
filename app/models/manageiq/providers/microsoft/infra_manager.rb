@@ -168,11 +168,6 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     %w(microsoft)
   end
 
-
-  def inventory_object_refresh?
-    true
-  end
-
   def vm_start(vm, _options = {})
     case vm.power_state
     when "suspended" then execute_power_operation("Resume", vm.uid_ems)
