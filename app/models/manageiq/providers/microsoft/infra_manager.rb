@@ -164,8 +164,8 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     true
   end
 
-  def supported_catalog_types
-    %w(microsoft)
+  def self.catalog_types
+    {"microsoft" => N_("SCVMM")}
   end
 
   def vm_start(vm, _options = {})
