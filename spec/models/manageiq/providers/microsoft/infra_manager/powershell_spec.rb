@@ -40,7 +40,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
     before(:each) do
       $original_scvmm_log = $scvmm_log.clone
       @log_file = ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "powershell.log")
-      $scvmm_log = VMDBLogger.new(@log_file, :error, "<POWERSHELL>")
+      $scvmm_log = VMDBLogger.new(@log_file, :level => :error, :progname => "<POWERSHELL>")
     end
 
     after(:each) do
