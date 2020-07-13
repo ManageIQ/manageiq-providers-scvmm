@@ -30,54 +30,88 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
       :title  => "Configure #{description}",
       :fields => [
         {
-          :component  => "text-field",
-          :name       => "endpoints.default.server",
-          :label      => "Server Hostname/IP Address",
-          :isRequired => true,
-          :validate   => [{:type => "required-validator"}]
+          :component => 'sub-form',
+          :name      => 'endpoints-subform',
+          :title     => _("Endpoints"),
+          :fields    => [{
+            :component              => 'validate-provider-credentials',
+            :name                   => 'endpoints.default.valid',
+            :skipSubmit             => true,
+            :validationDependencies => %w[type zone_id],
+            :fields                 => [
+              {
+                :component  => "text-field",
+                :name       => "endpoints.default.hostname",
+                :label      => _("Hostname (or IPv4 or IPv6 address)"),
+                :isRequired => true,
+                :validate   => [{:type => "required-validator"}]
+              },
+              {
+                :component  => "select-field",
+                :name       => "endpoints.default.security_protocol",
+                :label      => _("Security Protocol"),
+                :isRequired => true,
+                :validate   => [{:type => "required-validator"}],
+                :options    => [
+                  {
+                    :label => _("SSL"),
+                    :value => "ssl",
+                  },
+                  {
+                    :label => _("Kerberos"),
+                    :value => "kerberos",
+                  }
+                ]
+              },
+              {
+                :component  => "text-field",
+                :name       => "realm",
+                :label      => _("Realm"),
+                :isRequired => true,
+                :validate   => [{:type => "required-validator"}],
+                :helperText => _('Username must be in the format: name@realm'),
+                :condition  => {
+                  :when => 'endpoints.default.security_protocol',
+                  :is   => 'kerberos',
+                },
+              },
+              {
+                :component  => "text-field",
+                :name       => "authentications.default.userid",
+                :label      => _("Username"),
+                :isRequired => true,
+                :helperText => _('Should have privileged access, such as root or administrator.'),
+                :validate   => [{:type => "required-validator"}]
+              },
+              {
+                :component  => "password-field",
+                :name       => "authentications.default.password",
+                :label      => _("Password"),
+                :type       => "password",
+                :isRequired => true,
+                :validate   => [{:type => "required-validator"}]
+              },
+            ],
+          }],
         },
-        {
-          :component  => "text-field",
-          :name       => "endpoints.default.username",
-          :label      => "Username",
-          :isRequired => true,
-          :validate   => [{:type => "required-validator"}]
-        },
-        {
-          :component  => "text-field",
-          :name       => "endpoints.default.password",
-          :label      => "Password",
-          :type       => "password",
-          :isRequired => true,
-          :validate   => [{:type => "required-validator"}]
-        },
-        {
-          :component => "text-field",
-          :name      => "endpoints.default.port",
-          :label     => "Port",
-          :type      => "numberic",
-        }
       ]
     }.freeze
   end
 
-  # Verify Credentials
-  # args: {
-  #   "endpoints" => {
-  #     "default" => {
-  #       "server" => nil,
-  #       "username" => nil,
-  #       "password" => nil,
-  #       "port" => nil
-  #     }
-  #   }
-  # }
   def self.verify_credentials(args)
-    default_endpoint = args.dig("endpoints", "default")
-    username, password, server, port = default_endpoint&.values_at("username", "password", "server", "port")
+    realm = args['realm']
+    endpoint = args.dig("endpoints", 'default')
+    hostname, security_protocol = endpoint&.values_at('hostname', 'security_protocol')
+    authentication = args.dig("authentications", "default")
+    userid, password = authentication&.values_at('userid', 'password')
+    password = MiqPassword.try_decrypt(password)
+    password ||= find(args["id"]).authentication_password(authtype) if args['id']
 
-    raw_connect(build_connect_params(:user => username, :password => password, :hostname => server, :port => port), true)
-    true
+    !raw_connect(build_connect_params(:user              => userid,
+                                      :password          => password,
+                                      :hostname          => hostname,
+                                      :realm             => realm,
+                                      :security_protocol => security_protocol), true)
   end
 
   def self.raw_connect(connect_params, validate = false)
