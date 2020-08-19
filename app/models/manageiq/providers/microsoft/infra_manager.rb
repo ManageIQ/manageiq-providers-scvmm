@@ -44,14 +44,14 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
                 :name       => "endpoints.default.hostname",
                 :label      => _("Hostname (or IPv4 or IPv6 address)"),
                 :isRequired => true,
-                :validate   => [{:type => "required-validator"}]
+                :validate   => [{:type => "required"}]
               },
               {
-                :component  => "select-field",
+                :component  => "select",
                 :name       => "endpoints.default.security_protocol",
                 :label      => _("Security Protocol"),
                 :isRequired => true,
-                :validate   => [{:type => "required-validator"}],
+                :validate   => [{:type => "required"}],
                 :options    => [
                   {
                     :label => _("SSL"),
@@ -68,7 +68,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
                 :name       => "realm",
                 :label      => _("Realm"),
                 :isRequired => true,
-                :validate   => [{:type => "required-validator"}],
+                :validate   => [{:type => "required"}],
                 :helperText => _('Username must be in the format: name@realm'),
                 :condition  => {
                   :when => 'endpoints.default.security_protocol',
@@ -81,7 +81,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
                 :label      => _("Username"),
                 :isRequired => true,
                 :helperText => _('Should have privileged access, such as root or administrator.'),
-                :validate   => [{:type => "required-validator"}]
+                :validate   => [{:type => "required"}]
               },
               {
                 :component  => "password-field",
@@ -89,7 +89,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
                 :label      => _("Password"),
                 :type       => "password",
                 :isRequired => true,
-                :validate   => [{:type => "required-validator"}]
+                :validate   => [{:type => "required"}]
               },
             ],
           }],
