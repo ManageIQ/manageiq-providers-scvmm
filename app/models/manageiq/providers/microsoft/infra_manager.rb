@@ -31,16 +31,19 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
       :fields => [
         {
           :component => 'sub-form',
+          :id        => 'endpoints-subform',
           :name      => 'endpoints-subform',
           :title     => _("Endpoints"),
           :fields    => [{
             :component              => 'validate-provider-credentials',
+            :id                     => 'endpoints.default.valid',
             :name                   => 'endpoints.default.valid',
             :skipSubmit             => true,
             :validationDependencies => %w[type zone_id],
             :fields                 => [
               {
                 :component  => "text-field",
+                :id         => "endpoints.default.hostname",
                 :name       => "endpoints.default.hostname",
                 :label      => _("Hostname (or IPv4 or IPv6 address)"),
                 :isRequired => true,
@@ -48,6 +51,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
               },
               {
                 :component  => "select",
+                :id         => "endpoints.default.security_protocol",
                 :name       => "endpoints.default.security_protocol",
                 :label      => _("Security Protocol"),
                 :isRequired => true,
@@ -65,6 +69,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
               },
               {
                 :component  => "text-field",
+                :id         => "realm",
                 :name       => "realm",
                 :label      => _("Realm"),
                 :isRequired => true,
@@ -77,6 +82,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
               },
               {
                 :component  => "text-field",
+                :id         => "authentications.default.userid",
                 :name       => "authentications.default.userid",
                 :label      => _("Username"),
                 :isRequired => true,
@@ -85,6 +91,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
               },
               {
                 :component  => "password-field",
+                :id         => "authentications.default.password",
                 :name       => "authentications.default.password",
                 :label      => _("Password"),
                 :type       => "password",
