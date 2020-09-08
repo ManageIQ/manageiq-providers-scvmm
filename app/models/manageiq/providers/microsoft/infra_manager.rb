@@ -31,27 +31,31 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
       :fields => [
         {
           :component => 'sub-form',
+          :id        => 'endpoints-subform',
           :name      => 'endpoints-subform',
           :title     => _("Endpoints"),
           :fields    => [{
             :component              => 'validate-provider-credentials',
+            :id                     => 'endpoints.default.valid',
             :name                   => 'endpoints.default.valid',
             :skipSubmit             => true,
             :validationDependencies => %w[type zone_id],
             :fields                 => [
               {
                 :component  => "text-field",
+                :id         => "endpoints.default.hostname",
                 :name       => "endpoints.default.hostname",
                 :label      => _("Hostname (or IPv4 or IPv6 address)"),
                 :isRequired => true,
-                :validate   => [{:type => "required-validator"}]
+                :validate   => [{:type => "required"}]
               },
               {
-                :component  => "select-field",
+                :component  => "select",
+                :id         => "endpoints.default.security_protocol",
                 :name       => "endpoints.default.security_protocol",
                 :label      => _("Security Protocol"),
                 :isRequired => true,
-                :validate   => [{:type => "required-validator"}],
+                :validate   => [{:type => "required"}],
                 :options    => [
                   {
                     :label => _("SSL"),
@@ -65,10 +69,11 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
               },
               {
                 :component  => "text-field",
+                :id         => "realm",
                 :name       => "realm",
                 :label      => _("Realm"),
                 :isRequired => true,
-                :validate   => [{:type => "required-validator"}],
+                :validate   => [{:type => "required"}],
                 :helperText => _('Username must be in the format: name@realm'),
                 :condition  => {
                   :when => 'endpoints.default.security_protocol',
@@ -77,19 +82,21 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
               },
               {
                 :component  => "text-field",
+                :id         => "authentications.default.userid",
                 :name       => "authentications.default.userid",
                 :label      => _("Username"),
                 :isRequired => true,
                 :helperText => _('Should have privileged access, such as root or administrator.'),
-                :validate   => [{:type => "required-validator"}]
+                :validate   => [{:type => "required"}]
               },
               {
                 :component  => "password-field",
+                :id         => "authentications.default.password",
                 :name       => "authentications.default.password",
                 :label      => _("Password"),
                 :type       => "password",
                 :isRequired => true,
-                :validate   => [{:type => "required-validator"}]
+                :validate   => [{:type => "required"}]
               },
             ],
           }],
