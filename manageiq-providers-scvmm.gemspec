@@ -1,20 +1,24 @@
-$:.push File.expand_path("../lib", __FILE__)
+# coding: utf-8
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'manageiq/providers/scvmm/version'
 
-require "manageiq/providers/scvmm/version"
+Gem::Specification.new do |spec|
+  spec.name          = "manageiq-providers-scvmm"
+  spec.version       = ManageIQ::Providers::Scvmm::VERSION
+  spec.authors       = ["ManageIQ Authors"]
 
-Gem::Specification.new do |s|
-  s.name        = "manageiq-providers-scvmm"
-  s.version     = ManageIQ::Providers::Scvmm::VERSION
-  s.authors     = ["ManageIQ Developers"]
-  s.homepage    = "https://github.com/ManageIQ/manageiq-providers-scvmm"
-  s.summary     = "Scvmm Provider for ManageIQ"
-  s.description = "Scvmm Provider for ManageIQ"
-  s.licenses    = ["Apache-2.0"]
+  spec.summary       = "ManageIQ plugin for the Microsoft SCVMM provider."
+  spec.description   = "ManageIQ plugin for the Microsoft SCVMM provider."
+  spec.homepage      = "https://github.com/ManageIQ/manageiq-providers-scvmm"
+  spec.license       = "Apache-2.0"
 
-  s.files = Dir["{app,config,lib}/**/*"]
+  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
+  spec.bindir        = "exe"
+  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
+  spec.require_paths = ["lib"]
 
-  s.add_dependency "addressable", "~> 2.4"
+  spec.add_dependency "addressable", "~> 2.4"
 
-  s.add_development_dependency "codeclimate-test-reporter", "~> 1.0.0"
-  s.add_development_dependency "simplecov"
+  spec.add_development_dependency "simplecov"
 end
