@@ -39,6 +39,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
             :id                     => 'endpoints.default.valid',
             :name                   => 'endpoints.default.valid',
             :skipSubmit             => true,
+            :isRequired             => true,
             :validationDependencies => %w[type zone_id],
             :fields                 => [
               {
