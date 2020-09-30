@@ -112,7 +112,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
     hostname, security_protocol = endpoint&.values_at('hostname', 'security_protocol')
     authentication = args.dig("authentications", "default")
     userid, password = authentication&.values_at('userid', 'password')
-    password = MiqPassword.try_decrypt(password)
+    password = ManageIQ::Password.try_decrypt(password)
     password ||= find(args["id"]).authentication_password(authtype) if args['id']
 
     !raw_connect(build_connect_params(:user              => userid,
