@@ -1,9 +1,9 @@
 # ManageIQ::Providers::Scvmm
 
-[![Build Status](https://travis-ci.com/ManageIQ/manageiq-providers-scvmm.svg?branch=master)](https://travis-ci.com/ManageIQ/manageiq-providers-scvmm)
+[![Build Status](https://travis-ci.com/ManageIQ/manageiq-providers-scvmm.svg?branch=kasparov)](https://travis-ci.com/ManageIQ/manageiq-providers-scvmm)
 [![Maintainability](https://api.codeclimate.com/v1/badges/136e2b647b3c7218d288/maintainability)](https://codeclimate.com/github/ManageIQ/manageiq-providers-scvmm/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/136e2b647b3c7218d288/test_coverage)](https://codeclimate.com/github/ManageIQ/manageiq-providers-scvmm/test_coverage)
-[![Security](https://hakiri.io/github/ManageIQ/manageiq-providers-scvmm/master.svg)](https://hakiri.io/github/ManageIQ/manageiq-providers-scvmm/master)
+[![Security](https://hakiri.io/github/ManageIQ/manageiq-providers-scvmm/kasparov.svg)](https://hakiri.io/github/ManageIQ/manageiq-providers-scvmm/kasparov)
 
 [![Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ManageIQ/manageiq-providers-scvmm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
