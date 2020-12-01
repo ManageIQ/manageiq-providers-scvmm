@@ -3,9 +3,19 @@
     :blacklisted_event_names: []
     :event_handling:
       :event_groups:
+:ems_refresh:
+  :scvmm:
+    :refresh_interval: 15.minutes
 :http_proxy:
   :scvmm:
     :host:
     :password:
     :port:
     :user:
+:log:
+  :level_scvmm: info
+:workers:
+  :worker_base:
+    :queue_worker_base:
+      :ems_refresh_worker:
+        :ems_refresh_worker_microsoft: {}
