@@ -30,10 +30,6 @@ class ManageIQ::Providers::Microsoft::InfraManager::Scanning::Job < VmScan
       options[:use_existing_snapshot] = false
       return unless create_snapshot
       signal(:snapshot_complete)
-    rescue => err
-      _log.log_backtrace(err)
-      signal(:abort, err.message, "error")
-      return
     rescue Timeout::Error
       msg = case options[:snapshot]
             when :smartProxy, :skipped then "Request to log snapshot user event with EMS timed out."
@@ -41,6 +37,9 @@ class ManageIQ::Providers::Microsoft::InfraManager::Scanning::Job < VmScan
             end
       _log.error(msg)
       signal(:abort, msg, "error")
+    rescue => err
+      _log.log_backtrace(err)
+      signal(:abort, err.message, "error")
     end
   end
 
@@ -62,12 +61,12 @@ class ManageIQ::Providers::Microsoft::InfraManager::Scanning::Job < VmScan
         _log.info("Deleting snapshot: reference: [#{mor}]")
         begin
           delete_snapshot(mor)
-        rescue => err
-          _log.error(err.to_s)
-          return
         rescue Timeout::Error
           msg = "Request to delete snapshot timed out"
           _log.error(msg)
+        rescue => err
+          _log.error(err.to_s)
+          return
         end
 
         unless options[:snapshot] == :smartProxy
@@ -127,7 +126,7 @@ class ManageIQ::Providers::Microsoft::InfraManager::Scanning::Job < VmScan
   def create_snapshot
     if vm.ext_management_system
       _log.info("Creating snapshot")
-      user_event = start_user_event_message
+      log_start_user_event_message
       options[:snapshot] = :server
       begin
         # TODO: should this be a vm method?
