@@ -36,7 +36,7 @@ module ManageIQ::Providers::Microsoft::InfraManager::Provision::Cloning
 
   def dest_mount_point
     name = dest_datastore.name.scan(MT_POINT_REGEX).flatten.pop
-    URI.decode(name.to_s).tr('/', '\\')
+    URI.decode_www_form_component(name.to_s).tr('/', '\\')
   end
 
   def dest_logical_network
