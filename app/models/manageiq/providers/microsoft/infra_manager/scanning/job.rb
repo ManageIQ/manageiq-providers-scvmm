@@ -64,6 +64,7 @@ class ManageIQ::Providers::Microsoft::InfraManager::Scanning::Job < VmScan
         rescue Timeout::Error
           msg = "Request to delete snapshot timed out"
           _log.error(msg)
+          return
         rescue => err
           _log.error(err.to_s)
           return
