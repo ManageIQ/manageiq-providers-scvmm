@@ -3,3 +3,5 @@ Style/GlobalVars:
 
   # Loggers
   - $scvmm_log
+Lint/RescueException:
+  Enabled: false
