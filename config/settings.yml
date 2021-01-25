@@ -15,7 +15,5 @@
 :log:
   :level_scvmm: info
 :workers:
-  :worker_base:
-    :queue_worker_base:
-      :ems_refresh_worker:
-        :ems_refresh_worker_microsoft: {}
+  :ems_refresh_worker_microsoft:
+    :inherits_from: ems_refresh_worker
