@@ -51,13 +51,14 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
                 :validate   => [{:type => "required"}]
               },
               {
-                :component  => "select",
-                :id         => "endpoints.default.security_protocol",
-                :name       => "endpoints.default.security_protocol",
-                :label      => _("Security Protocol"),
-                :isRequired => true,
-                :validate   => [{:type => "required"}],
-                :options    => [
+                :component    => "select",
+                :id           => "endpoints.default.security_protocol",
+                :name         => "endpoints.default.security_protocol",
+                :label        => _("Security Protocol"),
+                :isRequired   => true,
+                :initialValue => 'ssl',
+                :validate     => [{:type => "required"}],
+                :options      => [
                   {
                     :label => _("SSL"),
                     :value => "ssl",
