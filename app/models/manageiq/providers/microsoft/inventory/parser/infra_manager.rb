@@ -284,7 +284,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       host_id    = host&.dig("ID")
       cluster_id = host&.dig("Cluster", "ID")
 
-      mount_point = data["VMCPath"].match(drive_letter).to_s
+      mount_point = data["VMCPath"]&.match(drive_letter)&.to_s
       storage_id  = collector.storage_id_by_host_name_and_mount_point.dig(data["HostName"], mount_point) if mount_point
 
       vm = persister.vms.build(
