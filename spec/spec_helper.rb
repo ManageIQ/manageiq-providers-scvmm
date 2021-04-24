@@ -11,4 +11,9 @@ require "manageiq-providers-scvmm"
 VCR.configure do |config|
   config.ignore_hosts 'codeclimate.com' if ENV['CI']
   config.cassette_library_dir = File.join(ManageIQ::Providers::Scvmm::Engine.root, 'spec/vcr_cassettes')
+
+  secrets = Rails.application.secrets
+  secrets.scvmm&.each_key do |secret|
+    config.define_cassette_placeholder(secrets.scvmm_defaults[secret]) { secrets.scvmm[secret] }
+  end
 end
