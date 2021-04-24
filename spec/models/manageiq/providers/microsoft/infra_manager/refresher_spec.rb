@@ -5,8 +5,13 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
   before(:each) do
     _guid, _server, zone = EvmSpecHelper.create_guid_miq_server_zone
     FactoryBot.create(:miq_region)
-    @ems = FactoryBot.create(:ems_microsoft_with_authentication, :zone => zone,
-        :hostname => "scvmm1111.manageiq.com", :ipaddress => "192.168.252.90", :security_protocol => "ssl")
+    @ems = FactoryBot.create(
+      :ems_microsoft_with_authentication,
+      :zone              => zone,
+      :hostname          => Rails.application.secrets.scvmm[:hostname],
+      :ipaddress         => Rails.application.secrets.scvmm[:ipaddress],
+      :security_protocol => "ssl"
+    )
 
     data_file = ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.json")
     output    = JSON.parse(IO.read(data_file.to_s))
