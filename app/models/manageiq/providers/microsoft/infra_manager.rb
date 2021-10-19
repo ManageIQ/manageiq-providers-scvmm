@@ -15,6 +15,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
 
   include_concern "Powershell"
 
+  supports :catalog
   supports :provisioning
 
   def self.ems_type
