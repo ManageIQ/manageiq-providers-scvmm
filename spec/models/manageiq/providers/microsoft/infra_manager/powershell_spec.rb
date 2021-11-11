@@ -66,12 +66,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
   end
 
   context "decompress_results" do
-    before(:all) do
-      @xml_file = ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.xml")
-      @xml = IO.read(@xml_file)
-    end
-
-    let(:xml) { @xml }
+    let(:xml) { ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.xml").read }
 
     it "handles compressed XML text" do
       zipped_text = Base64.encode64(ActiveSupport::Gzip.compress(xml))
@@ -80,19 +75,14 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
     end
 
     it "handles plain XML text" do
-      plain_text = @xml
+      plain_text = xml
       expect(powershell.decompress_results(plain_text)).to be_kind_of(String)
       expect(powershell.decompress_results(plain_text)).to eq(xml)
     end
   end
 
   context "parse_json_results" do
-    before(:all) do
-      @yml_file = ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.yml")
-      @json = JSON.dump(YAML.load(IO.read(@yml_file)))
-    end
-
-    let(:json) { @json }
+    let(:json) { JSON.dump(YAML.load_file(ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.yml"))) }
 
     it "handles compressed yaml text" do
       zipped_text = Base64.encode64(ActiveSupport::Gzip.compress(json))
