@@ -1,3 +1,5 @@
+require "stringio"
+
 describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
   let(:powershell) do
     instance_double(described_class.name).tap do |c|
@@ -22,15 +24,13 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
       "#< CLIXML\r\n<Objs Version=\"1.1.0.1\" xmlns=\"http://schemas.microsoft.com/powershell/2004/04\"><S S=\"Error\">Bogus : The term 'Bogus' is not recognized as the name of a cmdlet, function, _x000D__x000A_</S><S S=\"Error\">script file, or operable program. Check the spelling of the name, or if a path _x000D__x000A_</S><S S=\"Error\">was included, verify that the path is correct and try again._x000D__x000A_</S><S S=\"Error\">At line:1 char:40_x000D__x000A_</S><S S=\"Error\">+ $ProgressPreference='SilentlyContinue';Bogus_x000D__x000A_</S><S S=\"Error\">+                                        ~~~~~_x000D__x000A_</S><S S=\"Error\">    + CategoryInfo          : ObjectNotFound: (Bogus:String) [], CommandNotFou _x000D__x000A_</S><S S=\"Error\">   ndException_x000D__x000A_</S><S S=\"Error\">    + FullyQualifiedErrorId : CommandNotFoundException_x000D__x000A_</S><S S=\"Error\"> _x000D__x000A_</S></Objs>"
     end
 
-    before(:each) do
-      $original_scvmm_log = $scvmm_log.clone
-      @log_file = ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "powershell.log")
-      $scvmm_log = VMDBLogger.new(@log_file, :level => :error, :progname => "<POWERSHELL>")
-    end
+    let(:scvmm_log_io) { StringIO.new }
 
-    after(:each) do
-      $scvmm_log = $original_scvmm_log
-      File.delete(@log_file) if File.exist?(@log_file)
+    around do |example|
+      original_scvmm_log, $scvmm_log = $scvmm_log, ManageIQ::Loggers::Base.new(scvmm_log_io, :level => :error)
+      example.call
+    ensure
+      $scvmm_log = original_scvmm_log
     end
 
     it "returns true on success" do
@@ -40,7 +40,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
 
     it "sets the log header to the expected string" do
       powershell.log_dos_error_results('another error')
-      first_line = $scvmm_log.contents.split("\n")[1]
+      first_line = scvmm_log_io.string.split("\n").first
       expect(first_line).to match('MIQ')
       expect(first_line).to match('log_dos_error_results')
       expect(first_line).to match('another error')
@@ -48,7 +48,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
 
     it "does not write empty strings to the log" do
       powershell.log_dos_error_results('')
-      first_line = $scvmm_log.contents.split("\n")[1]
+      first_line = scvmm_log_io.string.split("\n").first
       expect(first_line).to be(nil)
     end
 
@@ -61,7 +61,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
       text << "spelling of the name, or if a path was included, verify that "
       text << "the path is correct and try again."
 
-      expect($scvmm_log.contents.include?(text)).to eql(true)
+      expect(scvmm_log_io.string.include?(text)).to eql(true)
     end
   end
 
