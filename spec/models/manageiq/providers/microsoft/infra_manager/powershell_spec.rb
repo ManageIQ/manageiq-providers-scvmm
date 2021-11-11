@@ -82,17 +82,17 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
   end
 
   context "parse_json_results" do
-    let(:json) { JSON.dump(YAML.load_file(ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.yml"))) }
+    let(:json) { ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.json").read }
 
-    it "handles compressed yaml text" do
+    it "handles compressed json text" do
       zipped_text = Base64.encode64(ActiveSupport::Gzip.compress(json))
-      expect(powershell.parse_json_results(zipped_text)).to be_kind_of(Array)
-      expect(powershell.parse_json_results(zipped_text).first).to be_kind_of(Hash)
+      expect(powershell.parse_json_results(zipped_text)).to be_kind_of(Hash)
+      expect(powershell.parse_json_results(zipped_text)).to eq JSON.parse(json)
     end
 
-    it "handles plain yaml text" do
-      expect(powershell.parse_json_results(json)).to be_kind_of(Array)
-      expect(powershell.parse_json_results(json).first).to be_kind_of(Hash)
+    it "handles plain json text" do
+      expect(powershell.parse_json_results(json)).to be_kind_of(Hash)
+      expect(powershell.parse_json_results(json)).to eq JSON.parse(json)
     end
   end
 
