@@ -1,24 +1,9 @@
 describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
-  before(:all) do
-    class PowershellTemp; end
-    class Connection; end
-
-    class Shell
-      def close; end
-    end
-
-    class Results
-      def stdout; "stdout"; end
-      def stderr; "stderr"; end
+  let(:powershell) do
+    instance_double(described_class.name).tap do |c|
+      c.extend(described_class::ClassMethods)
     end
   end
-
-  before(:each) do
-    @powershell = PowershellTemp.new
-    @powershell.extend(ManageIQ::Providers::Microsoft::InfraManager::Powershell::ClassMethods)
-  end
-
-  let(:powershell) { @powershell }
 
   context "class methods" do
     it "defines expected methods" do
@@ -122,16 +107,9 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
   end
 
   context "run_powershell_script" do
-    before(:all) do
-      @connection = Connection.new
-      @shell = Shell.new
-      @results = Results.new
-    end
-
-    let(:connection) { @connection }
-    let(:shell) { @shell }
-    let(:results) { @results }
-    let(:tempfile) { @tempfile }
+    let(:results)    { instance_double("WinRM::Output", :stdout => "stdout", :stderr => "stderr") }
+    let(:shell)      { instance_double("WinRM::Shells::Powershell", :run => results, :close => nil) }
+    let(:connection) { instance_double("WinRM::Connection", :shell => shell) }
 
     let(:ps_script) do
       <<-PS_SCRIPT
@@ -154,10 +132,6 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
     end
 
     it "accepts a string argument for a script" do
-      allow(powershell).to receive(:with_winrm_connection).and_return(connection)
-      allow(connection).to receive(:shell).and_return(shell)
-      allow(shell).to receive(:run).and_return(results)
-
       expect(powershell.run_powershell_script(connection, ps_script).stdout).to eql("stdout")
     end
   end
