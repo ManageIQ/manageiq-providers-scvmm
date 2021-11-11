@@ -66,12 +66,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
   end
 
   context "decompress_results" do
-    before(:all) do
-      @xml_file = ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.xml")
-      @xml = IO.read(@xml_file)
-    end
-
-    let(:xml) { @xml }
+    let(:xml) { ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.xml").read }
 
     it "handles compressed XML text" do
       zipped_text = Base64.encode64(ActiveSupport::Gzip.compress(xml))
@@ -80,29 +75,24 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Powershell do
     end
 
     it "handles plain XML text" do
-      plain_text = @xml
+      plain_text = xml
       expect(powershell.decompress_results(plain_text)).to be_kind_of(String)
       expect(powershell.decompress_results(plain_text)).to eq(xml)
     end
   end
 
   context "parse_json_results" do
-    before(:all) do
-      @yml_file = ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.yml")
-      @json = JSON.dump(YAML.load(IO.read(@yml_file)))
-    end
+    let(:json) { ManageIQ::Providers::Scvmm::Engine.root.join("spec", "tools", "scvmm_data", "get_inventory_output.json").read }
 
-    let(:json) { @json }
-
-    it "handles compressed yaml text" do
+    it "handles compressed json text" do
       zipped_text = Base64.encode64(ActiveSupport::Gzip.compress(json))
-      expect(powershell.parse_json_results(zipped_text)).to be_kind_of(Array)
-      expect(powershell.parse_json_results(zipped_text).first).to be_kind_of(Hash)
+      expect(powershell.parse_json_results(zipped_text)).to be_kind_of(Hash)
+      expect(powershell.parse_json_results(zipped_text)).to eq JSON.parse(json)
     end
 
-    it "handles plain yaml text" do
-      expect(powershell.parse_json_results(json)).to be_kind_of(Array)
-      expect(powershell.parse_json_results(json).first).to be_kind_of(Hash)
+    it "handles plain json text" do
+      expect(powershell.parse_json_results(json)).to be_kind_of(Hash)
+      expect(powershell.parse_json_results(json)).to eq JSON.parse(json)
     end
   end
 
