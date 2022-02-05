@@ -1,6 +1,6 @@
 # ManageIQ::Providers::Scvmm
 
-[![Build Status](https://travis-ci.com/ManageIQ/manageiq-providers-scvmm.svg?branch=master)](https://travis-ci.com/github/ManageIQ/manageiq-providers-scvmm)
+[![CI](https://github.com/ManageIQ/manageiq-providers-scvmm/actions/workflows/ci.yaml/badge.svg)](https://github.com/ManageIQ/manageiq-providers-scvmm/actions/workflows/ci.yaml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/136e2b647b3c7218d288/maintainability)](https://codeclimate.com/github/ManageIQ/manageiq-providers-scvmm/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/136e2b647b3c7218d288/test_coverage)](https://codeclimate.com/github/ManageIQ/manageiq-providers-scvmm/test_coverage)
 
