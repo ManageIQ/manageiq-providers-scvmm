@@ -2,9 +2,6 @@ class ManageIQ::Providers::Microsoft::InfraManager::Vm < ManageIQ::Providers::In
   include_concern 'ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared'
   include_concern 'Operations'
 
-  supports_not :migrate, :reason => _("Migrate operation is not supported.")
-  supports_not :publish
-
   supports :reboot_guest do
     unsupported_reason_add(:reboot_guest, unsupported_reason(:control)) unless supports?(:control)
     unless current_state == 'on'
