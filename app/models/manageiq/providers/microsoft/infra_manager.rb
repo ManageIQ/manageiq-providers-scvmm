@@ -28,7 +28,7 @@ class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraM
   end
 
   def self.params_for_create
-    @params_for_create ||= {
+    {
       :title  => "Configure #{description}",
       :fields => [
         {
