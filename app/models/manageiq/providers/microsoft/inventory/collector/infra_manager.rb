@@ -25,10 +25,18 @@ class ManageIQ::Providers::Microsoft::Inventory::Collector::InfraManager < Manag
     end
   end
 
+  def volumes_by_id
+    @volumes_by_id ||= volumes.index_by { |volume| volume["ID"] }
+  end
+
   def fileshares
     @fileshares ||= begin
       hosts.collect { |host| host["RegisteredStorageFileShares"] }.flatten
     end
+  end
+
+  def fileshares_by_id
+    @fileshares_by_id ||= fileshares.index_by { |fileshare| fileshare["ID"] }
   end
 
   def hosts_by_host_name

@@ -201,21 +201,15 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
 
   def parse_host_storages(host, data)
     data["DiskVolumes"].each do |volume|
-      persister_storage = persister.storages.find(volume["ID"])
-      next if persister_storage.nil?
+      next unless collector.volumes_by_id.key?(volume["ID"])
 
-      persister.host_storages.build(
-        :host => host, :storage => persister_storage
-      )
+      persister.host_storages.build(:host => host, :storage => persister.storages.lazy_find(volume["ID"]))
     end
 
     data["RegisteredStorageFileShares"].each do |fileshare|
-      persister_storage = persister.storages.find(fileshare["ID"])
-      next if persister_storage.nil?
+      next unless collector.fileshares_by_id.key?(fileshare["ID"])
 
-      persister.host_storages.build(
-        :host => host, :storage => persister_storage
-      )
+      persister.host_storages.build(:host => host, :storage => persister.storages.lazy_find(fileshare["ID"]))
     end
   end
 
