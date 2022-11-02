@@ -294,6 +294,7 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     snapshot = v.snapshots.first
 
     expect(snapshot).to have_attributes(
+      :type        => "ManageIQ::Providers::Microsoft::InfraManager::Snapshot",
       :uid         => "16FF0C08-04D3-4BEE-9E74-34393E087F4A",
       :ems_ref     => "16FF0C08-04D3-4BEE-9E74-34393E087F4A",
       :parent_uid  => "F36C31F0-A138-4F24-8F56-10A3BFBD7D14",
