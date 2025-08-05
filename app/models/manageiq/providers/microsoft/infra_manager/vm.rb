@@ -1,25 +1,28 @@
 class ManageIQ::Providers::Microsoft::InfraManager::Vm < ManageIQ::Providers::InfraManager::Vm
-  include_concern 'ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared'
-  include_concern 'Operations'
+  include ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared
+  include Operations
 
   supports :reboot_guest do
-    unsupported_reason_add(:reboot_guest, unsupported_reason(:control)) unless supports?(:control)
-    unless current_state == 'on'
-      unsupported_reason_add(:reboot_guest, _('The VM is not powered on'))
+    if !supports?(:control)
+      unsupported_reason(:control)
+    elsif current_state != 'on'
+      _('The VM is not powered on')
     end
   end
 
   supports :shutdown_guest do
-    unsupported_reason_add(:shutdown_guest, unsupported_reason(:control)) unless supports?(:control)
-    unless current_state == 'on'
-      unsupported_reason_add(:shutdown_guest, _('The VM is not powered on'))
+    if !supports?(:control)
+      unsupported_reason(:control)
+    elsif current_state != 'on'
+      _('The VM is not powered on')
     end
   end
 
   supports :reset do
-    unsupported_reason_add(:reset, unsupported_reason(:control)) unless supports?(:control)
-    unless current_state == 'on'
-      unsupported_reason_add(:reset, _('The VM is not powered on'))
+    if !supports?(:control)
+      unsupported_reason(:control)
+    elsif current_state != 'on'
+      _('The VM is not powered on')
     end
   end
 
