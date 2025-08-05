@@ -8,8 +8,8 @@ describe ManageIQ::Providers::Microsoft::InfraManager::Refresher do
     @ems = FactoryBot.create(
       :ems_microsoft_with_authentication,
       :zone              => zone,
-      :hostname          => Rails.application.secrets.scvmm[:hostname],
-      :ipaddress         => Rails.application.secrets.scvmm[:ipaddress],
+      :hostname          => VcrSecrets.scvmm.hostname,
+      :ipaddress         => VcrSecrets.scvmm.ipaddress,
       :security_protocol => "ssl"
     )
 
