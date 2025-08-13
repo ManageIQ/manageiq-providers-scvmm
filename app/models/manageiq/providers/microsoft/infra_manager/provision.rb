@@ -1,5 +1,5 @@
 class ManageIQ::Providers::Microsoft::InfraManager::Provision < ::MiqProvision
-  include_concern 'Cloning'
-  include_concern 'Placement'
-  include_concern 'StateMachine'
+  include Cloning
+  include Placement
+  include StateMachine
 end

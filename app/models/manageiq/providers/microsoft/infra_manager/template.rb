@@ -1,11 +1,11 @@
 class ManageIQ::Providers::Microsoft::InfraManager::Template < ManageIQ::Providers::InfraManager::Template
-  include_concern 'ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared'
+  include ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared
 
   supports :provisioning do
-    if ext_management_system
-      unsupported_reason_add(:provisioning, ext_management_system.unsupported_reason(:provisioning)) unless ext_management_system.supports?(:provisioning)
-    else
-      unsupported_reason_add(:provisioning, _('not connected to ems'))
+    if !ext_management_system
+      _('not connected to ems')
+    elsif !ext_management_system.supports?(:provisioning)
+      ext_management_system.unsupported_reason(:provisioning)
     end
   end
 

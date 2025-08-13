@@ -1,20 +1,5 @@
 class ManageIQ::Providers::Microsoft::InfraManager < ManageIQ::Providers::InfraManager
-  require_nested :Cluster
-  require_nested :Datacenter
-  require_nested :Folder
-  require_nested :Host
-  require_nested :Provision
-  require_nested :ProvisionWorkflow
-  require_nested :Refresher
-  require_nested :RefreshWorker
-  require_nested :ResourcePool
-  require_nested :Snapshot
-  require_nested :Storage
-  require_nested :Subnet
-  require_nested :Template
-  require_nested :Vm
-
-  include_concern "Powershell"
+  include Powershell
 
   supports :catalog
   supports :create
