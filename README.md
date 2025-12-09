@@ -1,8 +1,6 @@
 # ManageIQ::Providers::Scvmm
 
 [![CI](https://github.com/ManageIQ/manageiq-providers-scvmm/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/ManageIQ/manageiq-providers-scvmm/actions/workflows/ci.yaml)
-[![Maintainability](https://api.codeclimate.com/v1/badges/136e2b647b3c7218d288/maintainability)](https://codeclimate.com/github/ManageIQ/manageiq-providers-scvmm/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/136e2b647b3c7218d288/test_coverage)](https://codeclimate.com/github/ManageIQ/manageiq-providers-scvmm/test_coverage)
 
 [![Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ManageIQ/manageiq-providers-scvmm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
