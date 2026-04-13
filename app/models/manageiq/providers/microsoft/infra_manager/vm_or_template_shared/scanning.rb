@@ -4,7 +4,7 @@ module ManageIQ::Providers::Microsoft::InfraManager::VmOrTemplateShared::Scannin
   included do
     supports :smartstate_analysis do
       feature_supported, reason = check_feature_support('smartstate_analysis')
-      reason unless feature_supported?
+      reason unless feature_supported
     end
   end
 
