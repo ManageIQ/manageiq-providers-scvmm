@@ -20,11 +20,11 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
   def parse_ems
     api_version, guid = collector.ems.values_at("Version", "Guid")
 
-    # TODO: shouldn't have to update the ems directly from the parser
-    manager = collector.manager
-    manager.api_version = api_version
-    manager.uid_ems     = guid
-    manager.save!
+    persister.ext_management_system.build(
+      :api_version => api_version,
+      :uid_ems     => guid,
+      :guid        => persister.manager.guid
+    )
   end
 
   def parse_datacenters
@@ -45,7 +45,7 @@ class ManageIQ::Providers::Microsoft::Inventory::Parser::InfraManager < ManageIQ
       :ems_ref => "root_dc",
       :uid_ems => "root_dc",
       :hidden  => true,
-      :parent  => nil,
+      :parent  => persister.ext_management_system.lazy_find(persister.manager.guid)
     )
 
     persister.ems_folders.build(
