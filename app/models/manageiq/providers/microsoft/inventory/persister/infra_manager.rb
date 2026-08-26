@@ -1,5 +1,6 @@
 class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < ManageIQ::Providers::Microsoft::Inventory::Persister
   def initialize_inventory_collections
+    add_collection(infra, :ext_management_system)
     add_collection(infra, :disks)
     add_collection(infra, :clusters)
     add_collection(infra, :ems_folders)
@@ -22,7 +23,6 @@ class ManageIQ::Providers::Microsoft::Inventory::Persister::InfraManager < Manag
     add_collection(infra, :host_virtual_switches)
     add_collection(infra, :subnets)
     add_collection(infra, :vms)
-    add_collection(infra, :root_folder_relationship)
     add_collection(infra, :vm_parent_blue_folders)
     add_collection(infra, :parent_blue_folders)
   end
