@@ -20,7 +20,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "addressable", "~> 2.4"
   spec.add_dependency "winrm"
-  spec.add_dependency "winrm-elevated"
 
   spec.add_development_dependency "manageiq-style"
   spec.add_development_dependency "simplecov", ">= 0.21.2"
